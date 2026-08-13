@@ -524,6 +524,24 @@ describe('streamForProvider: openai-compatible', () => {
     ).rejects.toThrow(/no content \(finish_reason=content_filter\)/)
   })
 
+  it('MALFORMED_FUNCTION_CALL empty turns get an actionable error', async () => {
+    const { cb } = collector()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        okResponse(
+          sseStream([
+            'data: {"choices":[{"delta":{},"finish_reason":"function_call_filter: MALFORMED_FUNCTION_CALL"}]}',
+            'data: [DONE]',
+          ]),
+        ),
+      ),
+    )
+    await expect(
+      streamForProvider('openai', { apiKey: 'k', model: 'm' }, 'sys', [], [], 100, cb),
+    ).rejects.toThrow(/MALFORMED_FUNCTION_CALL.*exactly one tool/i)
+  })
+
   it('keeps partial content when content_filter cuts off after some text', async () => {
     const body = sseStream([
       'data: {"choices":[{"delta":{"content":"partial "}}]}',

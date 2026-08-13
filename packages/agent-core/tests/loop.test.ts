@@ -833,6 +833,71 @@ describe('AgentLoop compaction', () => {
     expect(onDone).toHaveBeenCalledWith({ text: 'done', cancelled: false, turnLimit: false })
   })
 
+  it('recovers from MALFORMED_FUNCTION_CALL instead of failing the run', async () => {
+    const transport = scriptedTransport([
+      (cb) => {
+        cb.onError(
+          'The model returned no content (finish_reason=function_call_filter: MALFORMED_FUNCTION_CALL)',
+        )
+      },
+      (cb) => {
+        cb.onToolCall({ id: 't1', name: 'do_thing', input: { a: 1 } })
+        cb.onDone()
+      },
+      (cb) => {
+        cb.onDelta('klaar')
+        cb.onDone()
+      },
+    ])
+    const onError = vi.fn()
+    const onDone = vi.fn()
+    const loop = new AgentLoop({
+      transport,
+      skill: makeSkill(),
+      events: { onError, onDone },
+    })
+    loop.run('moderniseer slides')
+    await flush()
+    await flush()
+    await flush()
+    expect(onError).not.toHaveBeenCalled()
+    expect(onDone).toHaveBeenCalledWith({ text: 'klaar', cancelled: false, turnLimit: false })
+    expect(loop.messages.some((m) => m.role === 'user' && m.text.includes('malformed'))).toBe(
+      true,
+    )
+  })
+
+  it('does not force tool_choice=required on turn 0 when the skill has many tools', async () => {
+    const choices: Array<string | undefined> = []
+    let turn = 0
+    const transport: AgentTransport = {
+      stream(request, cb) {
+        choices.push(request.toolChoice)
+        queueMicrotask(() => {
+          if (turn++ === 0) {
+            cb.onDelta('ok')
+            cb.onDone()
+          }
+        })
+        return { cancel: () => cb.onDone() }
+      },
+    }
+    const manyTools = Array.from({ length: 25 }, (_, i) => ({
+      name: `tool_${i}`,
+      description: 'd',
+      inputSchema: { type: 'object' as const },
+    }))
+    const skill: AgentSkill = {
+      ...makeSkill(),
+      tools: manyTools,
+      executeTool: () => ({ output: 'ok', summary: 'ok' }),
+    }
+    const loop = new AgentLoop({ transport, skill, events: { onDone: vi.fn() } })
+    loop.run('x')
+    await flush()
+    expect(choices[0]).toBeUndefined()
+  })
+
   it('a truncated tool call is fed back as "split the call", not as a JSON error', async () => {
     const transport = scriptedTransport([
       (cb) => {

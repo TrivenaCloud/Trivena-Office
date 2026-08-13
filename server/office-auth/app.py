@@ -16,6 +16,7 @@ validated against FRAPPE_BASE_URL (default https://cloud.trivena.tech).
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import os
@@ -507,15 +508,92 @@ def _openai_compat_backend() -> tuple[str, str, str]:
     return "", "", ""
 
 
+def _prepare_openai_compat_body(raw: bytes, backend: str) -> bytes:
+    """Normalize model id / max_tokens / GLM thinking flags for one upstream backend."""
+    default_cap = "8192" if backend in ("nvidia", "gemini") else "2048"
+    max_tokens_cap = int(os.environ.get("LLM_MAX_TOKENS", os.environ.get("OPENROUTER_MAX_TOKENS", default_cap)))
+    if not raw:
+        return raw
+    try:
+        payload = json.loads(raw)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return raw
+    if not isinstance(payload, dict):
+        return raw
+    if backend == "nvidia":
+        payload["model"] = _normalize_nvidia_model(
+            payload.get("model") if isinstance(payload.get("model"), str) else None
+        )
+        # GLM-5.2 thinks by default; reasoning can eat the whole budget and leave
+        # the visible reply empty / truncated (e.g. a lone "##").
+        thinking_env = os.environ.get("NVIDIA_THINKING", "disabled").strip().lower()
+        if thinking_env in ("0", "false", "off", "disabled", ""):
+            payload["thinking"] = {"type": "disabled"}
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
+        # Drop OpenAI-only fields that confuse some NIM builds after a Gemini→NVIDIA remap.
+        payload.pop("reasoning_effort", None)
+    elif backend == "gemini":
+        payload["model"] = _normalize_gemini_model(
+            payload.get("model") if isinstance(payload.get("model"), str) else None
+        )
+        payload.pop("thinking", None)
+        payload.pop("chat_template_kwargs", None)
+    requested = payload.get("max_tokens")
+    if isinstance(requested, (int, float)) and requested > max_tokens_cap:
+        payload["max_tokens"] = max_tokens_cap
+    elif requested is None and max_tokens_cap > 0:
+        payload["max_tokens"] = max_tokens_cap
+    return json.dumps(payload).encode("utf-8")
+
+
+def _fallback_backends() -> list[tuple[str, str, str]]:
+    """Ordered (backend, api_key, base_url): NVIDIA → Gemini → OpenRouter (skip unset)."""
+    ordered: list[tuple[str, str, str]] = []
+    nvidia_key = os.environ.get("NVIDIA_API_KEY", "") or os.environ.get("NGC_API_KEY", "")
+    if nvidia_key:
+        ordered.append(
+            (
+                "nvidia",
+                nvidia_key,
+                os.environ.get("NVIDIA_OPENAI_BASE_URL", "https://integrate.api.nvidia.com/v1").rstrip(
+                    "/"
+                ),
+            )
+        )
+    gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
+    if gemini_key:
+        ordered.append(
+            (
+                "gemini",
+                gemini_key,
+                os.environ.get(
+                    "GEMINI_OPENAI_BASE_URL",
+                    "https://generativelanguage.googleapis.com/v1beta/openai",
+                ).rstrip("/"),
+            )
+        )
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
+    if openrouter_key:
+        ordered.append(
+            (
+                "openrouter",
+                openrouter_key,
+                os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/"),
+            )
+        )
+    return ordered
+
+
 @app.api_route("/api/llm/openai/v1/{path:path}", methods=["GET", "POST"])
 async def llm_openai(path: str, request: Request, authorization: str | None = Header(default=None)):
     """Proxy OpenAI-compatible traffic.
 
     Prefer NVIDIA NIM (GLM) when NVIDIA_API_KEY is set; else Gemini; else OpenRouter.
+    On NVIDIA 429, automatically fall back to Gemini/OpenRouter when configured.
     """
     email = _require_office_key(authorization)
-    backend, api_key, base = _openai_compat_backend()
-    if not api_key:
+    backends = _fallback_backends()
+    if not backends:
         return JSONResponse(
             {
                 "error": {
@@ -528,41 +606,58 @@ async def llm_openai(path: str, request: Request, authorization: str | None = He
             },
             status_code=503,
         )
-    body = await request.body()
-    default_cap = "8192" if backend in ("nvidia", "gemini") else "2048"
-    max_tokens_cap = int(os.environ.get("LLM_MAX_TOKENS", os.environ.get("OPENROUTER_MAX_TOKENS", default_cap)))
-    if request.method.upper() == "POST" and body:
-        try:
-            payload = json.loads(body)
-            if isinstance(payload, dict):
-                if backend == "nvidia":
-                    payload["model"] = _normalize_nvidia_model(
-                        payload.get("model") if isinstance(payload.get("model"), str) else None
-                    )
-                elif backend == "gemini":
-                    payload["model"] = _normalize_gemini_model(
-                        payload.get("model") if isinstance(payload.get("model"), str) else None
-                    )
-                requested = payload.get("max_tokens")
-                if isinstance(requested, (int, float)) and requested > max_tokens_cap:
-                    payload["max_tokens"] = max_tokens_cap
-                elif requested is None and max_tokens_cap > 0:
-                    payload["max_tokens"] = max_tokens_cap
-                body = json.dumps(payload).encode("utf-8")
-        except (json.JSONDecodeError, TypeError, ValueError):
-            pass
-    headers = {
-        "authorization": f"Bearer {api_key}",
-        "content-type": request.headers.get("content-type", "application/json"),
-        "X-Trivena-User": email,
-    }
-    if backend == "openrouter":
-        headers["HTTP-Referer"] = os.environ.get("PUBLIC_BASE_URL", "https://cloud.trivena.tech")
-        headers["X-Title"] = "TrivOffice"
-    url = f"{base}/{path}"
+    raw_body = await request.body()
     client = httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=30.0))
-    req = client.build_request(request.method, url, content=body, headers=headers)
-    upstream = await client.send(req, stream=True)
+    upstream = None
+    last_status = 500
+    used_backend = backends[0][0]
+
+    for backend, api_key, base in backends:
+        body = (
+            _prepare_openai_compat_body(raw_body, backend)
+            if request.method.upper() == "POST"
+            else raw_body
+        )
+        headers = {
+            "authorization": f"Bearer {api_key}",
+            "content-type": request.headers.get("content-type", "application/json"),
+            "X-Trivena-User": email,
+            "X-Trivena-LLM-Backend": backend,
+        }
+        if backend == "openrouter":
+            headers["HTTP-Referer"] = os.environ.get("PUBLIC_BASE_URL", "https://cloud.trivena.tech")
+            headers["X-Title"] = "TrivOffice"
+        url = f"{base}/{path}"
+        retries = 2 if backend == "nvidia" else 1
+        for attempt in range(retries):
+            req = client.build_request(request.method, url, content=body, headers=headers)
+            upstream = await client.send(req, stream=True)
+            last_status = upstream.status_code
+            used_backend = backend
+            if upstream.status_code != 429:
+                break
+            await upstream.aclose()
+            upstream = None
+            if attempt < retries - 1:
+                await asyncio.sleep(1.2 * (attempt + 1))
+        if last_status != 429:
+            break
+        # try next backend (e.g. NVIDIA → Gemini)
+
+    if upstream is None:
+        await client.aclose()
+        return JSONResponse(
+            {
+                "error": {
+                    "message": (
+                        "All LLM backends are rate-limited or unavailable. "
+                        "Wait a few seconds and try again."
+                    ),
+                    "type": "rate_limit_error",
+                }
+            },
+            status_code=429,
+        )
 
     async def relay():
         try:
@@ -576,6 +671,7 @@ async def llm_openai(path: str, request: Request, authorization: str | None = He
         relay(),
         status_code=upstream.status_code,
         media_type=upstream.headers.get("content-type", "application/json"),
+        headers={"X-Trivena-LLM-Backend": used_backend},
     )
 
 

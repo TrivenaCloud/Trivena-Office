@@ -653,11 +653,14 @@ function emitOpenAiJsonMessage(bodyText: string, cb: StreamCallbacks): void {
     choices?: Array<{
       message?: {
         content?: string | null
+        reasoning_content?: string | null
         tool_calls?: Array<{ id?: string; function?: { name?: string; arguments?: string } }>
       }
       finish_reason?: string | null
     }>
     error?: { message?: string } | string
+    status?: number
+    title?: string
   }
   try {
     msg = JSON.parse(bodyText) as typeof msg
@@ -665,11 +668,20 @@ function emitOpenAiJsonMessage(bodyText: string, cb: StreamCallbacks): void {
     throw new Error(`The model returned an unparseable JSON body: ${httpBodyDetail(bodyText)}`)
   }
   if (msg.error) throw new Error(sseErrorText(msg.error, 'Model error'))
+  if (msg.status === 429 || /too many requests/i.test(msg.title ?? '')) {
+    throw new Error(
+      'NVIDIA API rate limit exceeded (Too Many Requests). Wait a few seconds and try again.',
+    )
+  }
   const choice = msg.choices?.[0]
   let emitted = false
-  if (choice?.message?.content) {
+  const visible =
+    (choice?.message?.content && choice.message.content.trim()) ||
+    (choice?.message?.reasoning_content && choice.message.reasoning_content.trim()) ||
+    ''
+  if (visible) {
     emitted = true
-    cb.onDelta(choice.message.content)
+    cb.onDelta(visible)
   }
   const toolCalls: AgentToolCall[] = []
   for (const tc of choice?.message?.tool_calls ?? []) {
@@ -792,6 +804,7 @@ async function openAiCompatibleTurn(
       choices?: Array<{
         delta?: {
           content?: string
+          reasoning_content?: string
           tool_calls?: Array<{
             index: number
             id?: string
@@ -801,13 +814,22 @@ async function openAiCompatibleTurn(
         finish_reason?: string | null
       }>
       error?: { message?: string } | string
+      status?: number
+      title?: string
     }
     if (event.error) throw new Error(sseErrorText(event.error, 'Model stream error'))
+    if (event.status === 429 || /too many requests/i.test(event.title ?? '')) {
+      throw new Error(
+        'NVIDIA API rate limit exceeded (Too Many Requests). Wait a few seconds and try again.',
+      )
+    }
     const choice = event.choices?.[0]
     if (!choice) continue
-    if (choice.delta?.content) {
+    // Prefer visible content; some GLM/NIM builds stream only reasoning_content.
+    const piece = choice.delta?.content || choice.delta?.reasoning_content
+    if (piece) {
       emitted = true
-      cb.onDelta(choice.delta.content)
+      cb.onDelta(piece)
     }
     for (const tc of choice.delta?.tool_calls ?? []) {
       const pending = pendingTools.get(tc.index) ?? {
@@ -834,6 +856,12 @@ async function openAiCompatibleTurn(
   // message framing at all (gateway soft-failure) — surface both instead of an
   // empty success; a genuine empty turn still carries finish_reason=stop
   if (!emitted && abnormalFinish) {
+    if (/MALFORMED_FUNCTION_CALL|function_call_filter/i.test(abnormalFinish)) {
+      throw new Error(
+        `The model returned no content (finish_reason=${abnormalFinish}). ` +
+          'Call exactly one tool with valid JSON (for slides: get_deck_context, then regenerate_slide or execute_slide_script).',
+      )
+    }
     throw new Error(`The model returned no content (finish_reason=${abnormalFinish})`)
   }
   if (!emitted && !sawFinish) {

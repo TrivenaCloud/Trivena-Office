@@ -196,12 +196,15 @@ async def _llm_structure(
         f"BRIEF:\n{brief[:6000]}"
     )
     url = f"{base}/chat/completions"
-    payload = {
+    payload: dict[str, Any] = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.5,
         "max_tokens": 1800,
     }
+    if "integrate.api.nvidia.com" in base or model.startswith("z-ai/"):
+        payload["thinking"] = {"type": "disabled"}
+        payload["chat_template_kwargs"] = {"enable_thinking": False}
     async with httpx.AsyncClient(timeout=90.0) as client:
         resp = await client.post(
             url,

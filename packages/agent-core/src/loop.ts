@@ -88,9 +88,24 @@ const MAX_INPUT_PARSE_RETRIES = 3
  */
 const MAX_PLAN_ONLY_NUDGES = 2
 
+/**
+ * Cap on recoveries from Gemini's function_call_filter / MALFORMED_FUNCTION_CALL
+ * (common when tool_choice=required meets a large Slides tool surface).
+ */
+const MAX_MALFORMED_TOOL_NUDGES = 2
+
+/** Above this, do not force tool_choice=required on the first turn (Gemini malforms). */
+const AUTO_REQUIRE_TOOLS_MAX = 20
+
 const PLAN_ONLY_NUDGE =
   '[System] Do not only describe the plan. You must call document tools now to apply the requested changes. ' +
   'Call the tools immediately in this turn; a short summary comes only after the edits are done.'
+
+const MALFORMED_TOOL_NUDGE =
+  '[System] Your previous tool call was rejected as malformed (invalid function call JSON/name). ' +
+  'Call exactly ONE valid tool now with small, well-formed JSON. ' +
+  'For slides: get_deck_context or read_slide first, then regenerate_slide / execute_slide_script for one page — ' +
+  'never concatenate tool names or fire many set_element_* calls in one turn.'
 
 /** Detect "I'll polish the doc…" style replies that never emit tool_calls (common with Gemini). */
 function looksLikePlanOnly(text: string): boolean {
@@ -104,6 +119,10 @@ function looksLikePlanOnly(text: string): boolean {
       t,
     )
   )
+}
+
+function isMalformedToolCallError(error: string): boolean {
+  return /MALFORMED_FUNCTION_CALL|function_call_filter/i.test(error)
 }
 
 const TURN_LIMIT_NOTE =
@@ -196,6 +215,8 @@ export class AgentLoop<TSnapshot = unknown> {
   private inputParseFails = 0
   /** How many times we recovered from a text-only turn that never mutated the artifact. */
   private planOnlyNudges = 0
+  /** How many times we recovered from a MALFORMED_FUNCTION_CALL empty turn. */
+  private malformedToolNudges = 0
   /** Next transport turn should force tool_choice=required (Gemini plan-only recovery). */
   private forceToolChoiceRequired = false
   private turnStopReason: string | null = null
@@ -268,6 +289,7 @@ export class AgentLoop<TSnapshot = unknown> {
     this.mutationSeen = false
     this.inputParseFails = 0
     this.planOnlyNudges = 0
+    this.malformedToolNudges = 0
     this.forceToolChoiceRequired = false
     this.abortController = new AbortController()
     const context = this.options.skill.buildContext?.() ?? ''
@@ -494,10 +516,12 @@ export class AgentLoop<TSnapshot = unknown> {
     this.turnStopReason = null
     // Some transports emit an extra onDone after cancel — this turn may finalize only once
     let settled = false
+    const toolCount = this.options.skill.tools.length
     const requireTools =
       !this.finalizing &&
-      this.options.skill.tools.length > 0 &&
-      (this.forceToolChoiceRequired || (!this.mutationSeen && this.turns === 0))
+      toolCount > 0 &&
+      (this.forceToolChoiceRequired ||
+        (!this.mutationSeen && this.turns === 0 && toolCount <= AUTO_REQUIRE_TOOLS_MAX))
     this.forceToolChoiceRequired = false
     this.handle = this.options.transport.stream(
       {
@@ -527,6 +551,27 @@ export class AgentLoop<TSnapshot = unknown> {
         },
         onError: (error) => {
           if (generation !== this.generation || settled) return
+          // Gemini often rejects a bad tool JSON with MALFORMED_FUNCTION_CALL and no
+          // content. Recover with a one-tool nudge instead of failing the whole run.
+          if (
+            !this.cancelled &&
+            !this.finalizing &&
+            isMalformedToolCallError(error) &&
+            this.malformedToolNudges < MAX_MALFORMED_TOOL_NUDGES &&
+            this.options.skill.tools.length > 0
+          ) {
+            settled = true
+            this.malformedToolNudges++
+            this.history.push({
+              role: 'assistant',
+              text: this.turnText || '(previous tool call was malformed)',
+            })
+            this.history.push({ role: 'user', text: MALFORMED_TOOL_NUDGE })
+            this.turns++
+            this.options.events?.onTurnEnd?.()
+            this.startTurn()
+            return
+          }
           settled = true
           this.running = false
           this.rollbackFailedRun()

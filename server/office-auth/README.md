@@ -65,6 +65,8 @@ and the **Press User** role (`User … is not part of any team`).
 - `NVIDIA_API_KEY` — primary LLM gateway (NVIDIA NIM; OpenAI-compatible)
 - `NVIDIA_DEFAULT_MODEL` — default `z-ai/glm-5.2`
 - `NVIDIA_OPENAI_BASE_URL` — default `https://integrate.api.nvidia.com/v1`
+- `NVIDIA_THINKING` — default `disabled` (GLM otherwise spends the budget on hidden reasoning)
+- On NVIDIA HTTP 429 the gateway retries briefly, then falls back to Gemini / OpenRouter if those keys are set
 - `GEMINI_API_KEY` — fallback if NVIDIA is unset
 - `GEMINI_DEFAULT_MODEL` — default `gemini-2.5-flash`
 - `OPENROUTER_API_KEY` — fallback if NVIDIA and Gemini are unset
