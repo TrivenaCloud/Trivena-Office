@@ -346,6 +346,18 @@ export async function gskResolveDownloadUrl(url: string): Promise<string> {
 const GSK_TOOL_CLI_BASE = 'https://www.genspark.ai/api/tool_cli'
 const SLIDE_GENERATE_TIMEOUT_MS = 240_000
 
+/**
+ * TrivOffice slide pages always go through Trivena Cloud (Gemini + PPTX).
+ * Override with TRIVOFFICE_SLIDE_API_BASE; set TRIVOFFICE_SLIDE_API_BASE=genspark
+ * only if you intentionally want the legacy Genspark tool_cli host.
+ */
+function toolCliBase(): string {
+  const override = process.env.TRIVOFFICE_SLIDE_API_BASE?.trim()
+  if (override === 'genspark') return GSK_TOOL_CLI_BASE
+  if (override) return override.replace(/\/+$/, '')
+  return 'https://cloud.trivena.tech/api/tool_cli'
+}
+
 export interface GskSlideGenerateOptions {
   /** Content and layout brief for this page */
   brief: string
@@ -392,11 +404,12 @@ async function toolCliPost(
   const onAbort = () => controller.abort()
   signal?.addEventListener('abort', onAbort, { once: true })
   try {
-    const resp = await fetch(`${GSK_TOOL_CLI_BASE}${path}`, {
+    const resp = await fetch(`${toolCliBase()}${path}`, {
       method: 'POST',
       // X-Agent-Type splits TrivOffice usage out of the proxy's "Claw" billing bucket
       headers: {
         'X-Api-Key': key,
+        Authorization: `Bearer ${key}`,
         'Content-Type': 'application/json',
         'X-Agent-Type': 'genoffice',
       },
@@ -417,8 +430,11 @@ async function toolCliPost(
 }
 
 /**
- * Generates one editable slide in the cloud (brief → HTML → one-slide PPTX)
+ * Generates one editable slide in the cloud (brief → one-slide PPTX)
  * and returns the downloaded PPTX bytes plus the model that produced it.
+ *
+ * Trivena (`trk-` keys) returns `pptx_base64` directly. Legacy Genspark returns
+ * a file-wrapper URL that must be resolved via `/file/download`.
  */
 export async function gskSlideGenerate(
   options: GskSlideGenerateOptions,
@@ -435,6 +451,10 @@ export async function gskSlideGenerate(
   const data = asRecord(
     await toolCliPost('/slide_generate', body, SLIDE_GENERATE_TIMEOUT_MS, signal),
   )
+  if (typeof data.pptx_base64 === 'string' && data.pptx_base64) {
+    const raw = Buffer.from(data.pptx_base64, 'base64')
+    return { bytes: new Uint8Array(raw), model: String(data.model ?? '') }
+  }
   const pptxUrl = data.pptx_url
   if (!pptxUrl)
     throw new Error(`slide_generate returned no pptx_url: ${JSON.stringify(data).slice(0, 200)}`)

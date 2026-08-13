@@ -378,10 +378,17 @@ def lookup_api_key(token: str) -> str | None:
 # present in the service environment (ANTHROPIC_API_KEY / OPENAI_API_KEY).
 
 
-def _require_office_key(authorization: str | None) -> str:
-    if not authorization or not authorization.lower().startswith("bearer "):
+def _require_office_key(
+    authorization: str | None,
+    x_api_key: str | None = None,
+) -> str:
+    token = ""
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ", 1)[1].strip()
+    elif x_api_key:
+        token = x_api_key.strip()
+    if not token:
         raise HTTPException(status_code=401, detail="Sign in to Trivena Cloud from TrivOffice")
-    token = authorization.split(" ", 1)[1].strip()
     email = lookup_api_key(token)
     if not email:
         # Also accept the raw token stored during login when hash lookup fails
@@ -390,9 +397,39 @@ def _require_office_key(authorization: str | None) -> str:
     return email
 
 
+def _office_key_from_request(request: Request) -> str:
+    return _require_office_key(
+        request.headers.get("authorization"),
+        request.headers.get("x-api-key"),
+    )
+
+
+@app.post("/api/tool_cli/slide_generate")
+async def tool_cli_slide_generate(request: Request) -> JSONResponse:
+    """TrivOffice cloud page gen — NDJSON-compatible with Genspark tool_cli."""
+    _office_key_from_request(request)
+    try:
+        payload = await request.json()
+    except Exception:
+        return JSONResponse({"status": "error", "message": "Invalid JSON body"}, status_code=400)
+    if not isinstance(payload, dict):
+        return JSONResponse({"status": "error", "message": "Body must be an object"}, status_code=400)
+    try:
+        from slide_generate import generate_slide_pptx
+
+        data = await generate_slide_pptx(payload)
+    except ValueError as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)[:300]}, status_code=502)
+    # Match tool_cli NDJSON result line so existing desktop parsers keep working.
+    line = json.dumps({"status": "ok", "data": data}, ensure_ascii=False)
+    return Response(content=line + "\n", media_type="application/x-ndjson")
+
+
 @app.api_route("/api/llm/anthropic/{path:path}", methods=["GET", "POST"])
 async def llm_anthropic(path: str, request: Request, authorization: str | None = Header(default=None)):
-    _require_office_key(authorization)
+    _require_office_key(authorization, request.headers.get("x-api-key"))
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
         return JSONResponse(
