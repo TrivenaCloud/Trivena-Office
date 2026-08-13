@@ -601,10 +601,10 @@ function AccountEntry({
         aria-expanded={settingsOpen}
         data-tip={
           loggedIn
-            ? email || t('loggedInGenspark')
+            ? email || t('loggedInTrivenaCloud')
             : waiting
               ? t('waitingLogin')
-              : (errorText ?? t('loginGenspark'))
+              : (errorText ?? t('loginTrivenaCloud'))
         }
         aria-label={t('settings')}
       >
@@ -821,7 +821,7 @@ function CloudProjectsView() {
         <p className="empty proj-empty">
           <span className="empty-hint">{t('cloudLoginHint')}</span>
           <button className="btn btn-secondary" disabled={loginWaiting} onClick={startLogin}>
-            {loginWaiting ? t('waitingShort') : t('loginGenspark')}
+            {loginWaiting ? t('waitingShort') : t('loginTrivenaCloud')}
           </button>
         </p>
       )

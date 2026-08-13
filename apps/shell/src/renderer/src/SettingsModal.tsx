@@ -270,7 +270,7 @@ export function SettingsModal({
                         </>
                       )}
                       <button className="set-btn primary" onClick={onLogin}>
-                        {loginWaiting ? t('waitingShort') : t('loginGenspark')}
+                        {loginWaiting ? t('waitingShort') : t('loginTrivenaCloud')}
                       </button>
                     </>
                   )}

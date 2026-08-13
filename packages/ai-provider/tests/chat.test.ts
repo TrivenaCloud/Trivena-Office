@@ -104,9 +104,7 @@ describe('chatForProvider', () => {
   it('genspark: routes all models to the OpenAI-compatible OpenRouter proxy', async () => {
     const fetchMock = vi
       .fn()
-      .mockImplementation(async () =>
-        jsonResponse({ choices: [{ message: { content: 'ok' } }] }),
-      )
+      .mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     vi.stubGlobal('fetch', fetchMock)
     await chatForProvider(
       'genspark',
@@ -130,9 +128,7 @@ describe('chatForProvider', () => {
   it('genspark: stamps X-Agent-Type; direct vendors do not get it', async () => {
     const fetchMock = vi
       .fn()
-      .mockImplementation(async () =>
-        jsonResponse({ choices: [{ message: { content: 'ok' } }] }),
-      )
+      .mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     vi.stubGlobal('fetch', fetchMock)
     await chatForProvider(
       'genspark',

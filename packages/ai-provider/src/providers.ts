@@ -15,7 +15,11 @@ export const GENSPARK_AGENT_TYPE = 'trivoffice'
 
 export function gensparkAttributionHeaders(baseUrl?: string): Record<string, string> {
   if (!baseUrl) return {}
-  if (baseUrl.includes('genspark.ai') || baseUrl.includes('trivena.tech') || baseUrl.includes('trivena.app')) {
+  if (
+    baseUrl.includes('genspark.ai') ||
+    baseUrl.includes('trivena.tech') ||
+    baseUrl.includes('trivena.app')
+  ) {
     return { 'X-Agent-Type': GENSPARK_AGENT_TYPE }
   }
   return {}
