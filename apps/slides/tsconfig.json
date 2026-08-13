@@ -7,12 +7,12 @@
     // Pin resolution to this repo's workspace sources (avoids stale types when node_modules links point elsewhere)
     "baseUrl": ".",
     "paths": {
-      "@genoffice/pptx-engine": ["../../packages/pptx-engine/src/index.ts"],
-      "@genoffice/pptx-engine/table-grid": ["../../packages/pptx-engine/src/table-grid.ts"],
-      "@genoffice/pptx-engine/background-promote": [
+      "@trivoffice/pptx-engine": ["../../packages/pptx-engine/src/index.ts"],
+      "@trivoffice/pptx-engine/table-grid": ["../../packages/pptx-engine/src/table-grid.ts"],
+      "@trivoffice/pptx-engine/background-promote": [
         "../../packages/pptx-engine/src/background-promote.ts"
       ],
-      "@genoffice/pptx-render": ["../../packages/pptx-render/src/index.ts"]
+      "@trivoffice/pptx-render": ["../../packages/pptx-render/src/index.ts"]
     }
   },
   "include": ["src", "tests", "electron.vite.config.ts", "vitest.config.ts"]

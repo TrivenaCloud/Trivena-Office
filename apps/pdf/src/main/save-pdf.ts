@@ -24,7 +24,7 @@ import type {
 } from '../shared/ipc'
 
 const num = (v: number) => Math.round(v * 100) / 100
-const STATIC_FORM_FILLS_KEY = PDFName.of('GenOfficeStaticFormFills')
+const STATIC_FORM_FILLS_KEY = PDFName.of('TrivOfficeStaticFormFills')
 
 function validStaticFormFill(value: unknown): value is StaticFormFillRecord {
   if (!value || typeof value !== 'object') return false
@@ -71,7 +71,7 @@ function resultingStaticFormFills(
 
 function setVisualSignatureMetadata(annot: PDFDict, fieldName: string | undefined): void {
   if (!fieldName) return
-  annot.set(PDFName.of('GenOfficeFormField'), PDFHexString.fromText(fieldName))
+  annot.set(PDFName.of('TrivOfficeFormField'), PDFHexString.fromText(fieldName))
   annot.set(
     PDFName.of('Contents'),
     PDFHexString.fromText(`${VISUAL_SIGNATURE_CONTENT_PREFIX}${fieldName}`),
@@ -154,7 +154,7 @@ function addMarkup(pdfDoc: PDFDocument, page: PDFPage, m: MarkupInput): void {
     QuadPoints: m.quads.flat(),
     C: m.color,
     F: 4, // print
-    T: 'GenOffice',
+    T: 'TrivOffice',
     P: page.ref,
     AP: { N: apRef },
   })
@@ -226,7 +226,7 @@ async function addImageStamp(
     P: page.ref,
     AP: { N: pdfDoc.context.register(ap) },
   })
-  annot.set(PDFName.of('T'), PDFHexString.fromText('GenOffice'))
+  annot.set(PDFName.of('T'), PDFHexString.fromText('TrivOffice'))
   setVisualSignatureMetadata(annot, d.formFieldName)
   appendAnnot(pdfDoc, page, pdfDoc.context.register(annot))
 }
@@ -248,7 +248,7 @@ function addDrawing(pdfDoc: PDFDocument, page: PDFPage, d: DrawingInput): void {
       P: page.ref,
     })
     annot.set(PDFName.of('Contents'), PDFHexString.fromText(d.contents))
-    annot.set(PDFName.of('T'), PDFHexString.fromText('GenOffice'))
+    annot.set(PDFName.of('T'), PDFHexString.fromText('TrivOffice'))
     appendAnnot(pdfDoc, page, pdfDoc.context.register(annot))
     return
   }
@@ -319,7 +319,7 @@ function addDrawing(pdfDoc: PDFDocument, page: PDFPage, d: DrawingInput): void {
   if (d.kind === 'line' || d.kind === 'arrow') {
     annot.set(PDFName.of('L'), pdfDoc.context.obj([...d.from, ...d.to]))
   }
-  annot.set(PDFName.of('T'), PDFHexString.fromText('GenOffice'))
+  annot.set(PDFName.of('T'), PDFHexString.fromText('TrivOffice'))
   if (d.kind === 'ink') setVisualSignatureMetadata(annot, d.formFieldName)
   appendAnnot(pdfDoc, page, pdfDoc.context.register(annot))
 }

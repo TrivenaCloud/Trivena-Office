@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
-import { shapePreviewPath } from '@genoffice/ui'
+import { shapePreviewPath } from '@trivoffice/ui'
 
 import type { createUniver } from './create-univer'
 

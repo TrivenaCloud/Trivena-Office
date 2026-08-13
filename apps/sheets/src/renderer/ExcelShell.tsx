@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { platformShortcuts } from '@genoffice/i18n'
-import { SHAPE_GALLERY_GROUPS, ShapePreview } from '@genoffice/ui'
+import { platformShortcuts } from '@trivoffice/i18n'
+import { SHAPE_GALLERY_GROUPS, ShapePreview } from '@trivoffice/ui'
 
 import {
   CaretIcon,

@@ -7,18 +7,18 @@
  * renderer sends edit intents (text/geometry changes) back to the main process, which applies
  * them to the model and rebuilds the RenderSlide.
  */
-import type { RenderSlide } from '@genoffice/pptx-render'
-import type { SlideComment, SectionInfo } from '@genoffice/pptx-engine'
+import type { RenderSlide } from '@trivoffice/pptx-render'
+import type { SlideComment, SectionInfo } from '@trivoffice/pptx-engine'
 import type {
   AiSettings,
   AiStreamChunk,
   AiStreamRequest,
   GenSparkAccountStatus,
-} from '@genoffice/ai-provider'
+} from '@trivoffice/ai-provider'
 
-export type { SlideComment, SectionInfo } from '@genoffice/pptx-engine'
+export type { SlideComment, SectionInfo } from '@trivoffice/pptx-engine'
 
-// Canonical definitions of AI-related types live in @genoffice/ai-provider / @genoffice/agent-core (shared with docs)
+// Canonical definitions of AI-related types live in @trivoffice/ai-provider / @trivoffice/agent-core (shared with docs)
 export type {
   AiProviderConfig,
   AiProviderId,
@@ -27,9 +27,9 @@ export type {
   AiStreamChunk,
   AiStreamRequest,
   GenSparkAccountStatus,
-} from '@genoffice/ai-provider'
-export { AI_PROVIDERS } from '@genoffice/ai-provider'
-export type { AgentToolCall, AgentToolDef } from '@genoffice/agent-core'
+} from '@trivoffice/ai-provider'
+export { AI_PROVIDERS } from '@trivoffice/ai-provider'
+export type { AgentToolCall, AgentToolDef } from '@trivoffice/agent-core'
 
 export type UiTheme = 'light' | 'dark' | 'system'
 
@@ -1038,7 +1038,7 @@ export interface SlidesApi {
       })
     | { error: string }
   >
-  /** Whether cloud single-page generation (gsk slide_generate) is available (GENOFFICE_CLOUD_SLIDE=1 + gsk login) */
+  /** Whether cloud single-page generation (gsk slide_generate) is available (TRIVOFFICE_CLOUD_SLIDE=1 + gsk login) */
   cloudGenStatus: () => Promise<{ enabled: boolean }>
   /** Cloud single-page generation: brief → one-slide pptx temp file; the marker goes into an htmlToPptx pagesHtml slot in place of HTML */
   cloudGeneratePage: (op: {

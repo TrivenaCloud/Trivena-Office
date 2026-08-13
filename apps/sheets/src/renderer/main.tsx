@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom/client'
-import { htmlLang, type Lang } from '@genoffice/i18n'
-import { installScreenTips } from '@genoffice/ui'
+import { htmlLang, type Lang } from '@trivoffice/i18n'
+import { installScreenTips } from '@trivoffice/ui'
 
-import '@genoffice/ui/tokens.css'
-import '@genoffice/ui/screentip.css'
+import '@trivoffice/ui/tokens.css'
+import '@trivoffice/ui/screentip.css'
 import '@univerjs/preset-sheets-core/lib/index.css'
 
 import { App } from './App'

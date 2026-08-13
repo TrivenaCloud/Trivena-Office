@@ -5,7 +5,7 @@ import type {
   HfPartInfo,
   SectionInfo,
   SectionSettings,
-} from '@genoffice/docx-engine'
+} from '@trivoffice/docx-engine'
 import {
   appendEndnotesBlock,
   assignSections,

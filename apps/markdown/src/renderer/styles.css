@@ -1,6 +1,6 @@
 /* Per-app accent (word-blue family) + markdown-only tokens.
  * Chrome tokens (surface/text/border/…, AI panel --color-*) come from
- * @genoffice/ui/tokens.css; nothing here may shadow those names. */
+ * @trivoffice/ui/tokens.css; nothing here may shadow those names. */
 :root {
   --accent: #185abd;
   --accent-dark: #124a9e;

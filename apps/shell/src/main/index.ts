@@ -34,7 +34,7 @@ import menuMdIcon1x from './assets/menu-md.png?asset'
 import menuMdIcon2x from './assets/menu-md@2x.png?asset'
 import menuHomeIcon1x from './assets/menu-home.png?asset'
 import menuHomeIcon2x from './assets/menu-home@2x.png?asset'
-import { createI18n, isLang, normalizeLang, setUiLang, type Lang } from '@genoffice/i18n'
+import { createI18n, isLang, normalizeLang, setUiLang, type Lang } from '@trivoffice/i18n'
 import {
   DEFAULT_SAVE_DIR_KEY,
   appMenuLabels,
@@ -46,7 +46,7 @@ import {
   showOpenDialogWithMemory,
   showSaveDialogWithMemory,
   windowMenuTemplate,
-} from '@genoffice/electron-utils'
+} from '@trivoffice/electron-utils'
 import { readAppSettings, writeAppSetting } from './app-settings'
 import {
   clearCloudProjectsStore,
@@ -54,18 +54,18 @@ import {
   readCloudProjectsStore,
   syncCloudProjects,
 } from './cloud-projects'
-import { ProjectStore } from '@genoffice/project-store'
+import { ProjectStore } from '@trivoffice/project-store'
 import {
-  ensureGenofficeLogin,
-  genofficeLogout,
+  ensureTrivofficeLogin,
+  trivofficeLogout,
   gskConvertPdfToDocx,
   gskLoginInfo,
   hasGskAuth,
   loadGenofficeAuth,
   resolveGskEntry,
   setGskProxyUrl,
-  startGenofficeLogin,
-} from '@genoffice/ai-search'
+  startTrivofficeLogin,
+} from '@trivoffice/ai-search'
 
 import {
   buildDocsMenu,
@@ -156,7 +156,7 @@ import { applyUpdateChannel, initAutoUpdater } from './updater'
 import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 
 /**
- * GenOffice unified shell: ONE Electron app, ONE BrowserWindow, hosting the
+ * TrivOffice unified shell: ONE Electron app, ONE BrowserWindow, hosting the
  * docs and sheets modules as WebContentsView tabs behind a WPS-style tab
  * strip. The shell owns the lifecycle — single-instance lock, file-
  * association routing by extension, and per-active-tab menu switching.
@@ -166,16 +166,16 @@ import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 
 // ANY unpacked run (`npm run shell`, `npm run dev`, `npx electron .`) must not
 // share the installed app's userData or single-instance lock — otherwise a dev
-// run silently quits and forwards its argv to the running installed GenOffice.
-// GENOFFICE_USER_DATA: test drivers point this at a scratch dir so an
+// run silently quits and forwards its argv to the running installed TrivOffice.
+// TRIVOFFICE_USER_DATA: test drivers point this at a scratch dir so an
 // automated instance can run alongside the dev instance (separate lock).
 if (!app.isPackaged)
   app.setPath(
     'userData',
-    process.env.GENOFFICE_USER_DATA ?? join(app.getPath('appData'), 'GenOffice Dev'),
+    process.env.TRIVOFFICE_USER_DATA ?? join(app.getPath('appData'), 'TrivOffice Dev'),
   )
 
-// The product rename from "AI Office" to GenOffice changed the userData path; migrate old user data once
+// The product rename from "AI Office" to TrivOffice changed the userData path; migrate old user data once
 if (app.isPackaged) {
   const oldDir = join(app.getPath('appData'), 'AI Office')
   const newDir = app.getPath('userData')
@@ -236,7 +236,7 @@ configureMarkdownRuntime({
 
 // ---- UI language ----
 // Persisted in userData/app-settings.json so the editor modules can read the
-// same file when they pick up i18n later. GENOFFICE_LANG overrides for tests.
+// same file when they pick up i18n later. TRIVOFFICE_LANG overrides for tests.
 
 const APP_SETTINGS_PATH = () => join(app.getPath('userData'), 'app-settings.json')
 
@@ -244,8 +244,8 @@ let uiLang: Lang | null = null
 
 function currentLang(): Lang {
   if (uiLang) return uiLang
-  if (process.env.GENOFFICE_LANG) {
-    uiLang = normalizeLang(process.env.GENOFFICE_LANG)
+  if (process.env.TRIVOFFICE_LANG) {
+    uiLang = normalizeLang(process.env.TRIVOFFICE_LANG)
     setUiLang(uiLang)
     return uiLang
   }
@@ -281,10 +281,10 @@ function currentTheme(): UiTheme {
 }
 
 // ---- first-run onboarding ----
-// The GenTeam community page opened from the onboarding's second slide.
-// Stable short link served by the genoffice.ai site; it 302s to the tokened
+// The Trivena community page opened from the onboarding's second slide.
+// Stable short link served by the trivoffice.ai site; it 302s to the tokened
 // invite link, which stays out of this repo and rotates server-side.
-const GENTEAM_URL = 'https://genoffice.ai/join'
+const COMMUNITY_URL = 'https://github.com/TrivenaCloud/Trivena-Office'
 
 // Genspark credit-usage page opened from the account menu's credits row.
 // Kept main-side so the renderer never supplies the URL.
@@ -1429,7 +1429,7 @@ function createShellWindow(): void {
     height: 900,
     minWidth: 980,
     minHeight: 600,
-    title: 'GenOffice',
+    title: 'TrivOffice',
     // vibrancy: editor modules punch translucent regions (e.g. the slides
     // thumbnail pane) through to the desktop
     ...(process.platform === 'darwin'
@@ -1768,7 +1768,7 @@ function statEntries(paths: string[]): RecentEntry[] {
 }
 
 function registerHomeIpc(): void {
-  // signed-in means GenOffice's own device-code login; the shared gsk CLI key
+  // signed-in means TrivOffice's own device-code login; the shared gsk CLI key
   // is only a silent fallback, deliberately not shown here to nudge users onto our key
   ipcMain.handle(HOME_CHANNELS.accountStatus, async () => {
     if (!loadGenofficeAuth()) return { loggedIn: false }
@@ -1791,7 +1791,7 @@ function registerHomeIpc(): void {
     }
     // open the browser on the first url event only; later events refresh the rescue URL
     let opened = false
-    const launched = startGenofficeLogin((progress) => {
+    const launched = startTrivofficeLogin((progress) => {
       if (progress.url) {
         pendingLoginUrl = progress.url
         if (!opened) {
@@ -1810,7 +1810,7 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.accountLogout, async () => {
-    await genofficeLogout()
+    await trivofficeLogout()
     // the cloud projects cache belongs to the account that just signed out
     clearCloudProjectsStore(cloudProjectsStorePath())
   })
@@ -2031,8 +2031,8 @@ function registerHomeIpc(): void {
     return picked
   })
 
-  ipcMain.handle(HOME_CHANNELS.openGenTeam, () => {
-    shell.openExternal(GENTEAM_URL).catch(() => {
+  ipcMain.handle(HOME_CHANNELS.openCommunity, () => {
+    shell.openExternal(COMMUNITY_URL).catch(() => {
       // no browser handler available; nothing actionable for the user here
     })
   })
@@ -2447,7 +2447,7 @@ async function exportPdfAsDocx(): Promise<void> {
         cancelId: 1,
         noLink: true,
       })
-      if (response === 0) ensureGenofficeLogin((url) => void shell.openExternal(url))
+      if (response === 0) ensureTrivofficeLogin((url) => void shell.openExternal(url))
       return
     }
     const balance = (await gskLoginInfo())?.creditBalance

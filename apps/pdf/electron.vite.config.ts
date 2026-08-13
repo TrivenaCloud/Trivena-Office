@@ -12,21 +12,21 @@ const pdfjsRoot = dirname(dirname(require.resolve('pdfjs-dist/package.json')))
 const pdfjsDir = (sub: string) => normalizePath(join(pdfjsRoot, 'pdfjs-dist', sub))
 
 export default defineConfig({
-  // @genoffice/i18n ships as TS source; pdf-lib's package only includes out/** — both must be bundled
+  // @trivoffice/i18n ships as TS source; pdf-lib's package only includes out/** — both must be bundled
   main: {
     plugins: [
       externalizeDepsPlugin({
         exclude: [
-          '@genoffice/i18n',
+          '@trivoffice/i18n',
           'pdf-lib',
-          '@genoffice/electron-utils',
-          '@genoffice/font-metrics',
+          '@trivoffice/electron-utils',
+          '@trivoffice/font-metrics',
         ],
       }),
     ],
   },
   preload: {
-    plugins: [externalizeDepsPlugin({ exclude: ['@genoffice/i18n'] })],
+    plugins: [externalizeDepsPlugin({ exclude: ['@trivoffice/i18n'] })],
   },
   renderer: {
     plugins: [

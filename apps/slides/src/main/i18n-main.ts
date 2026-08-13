@@ -1,5 +1,5 @@
-/** Main-process i18n strings for GenOffice Slides (dialogs, native menus, export, autosave prompts). */
-import { createI18n, getUiLang } from '@genoffice/i18n'
+/** Main-process i18n strings for TrivOffice Slides (dialogs, native menus, export, autosave prompts). */
+import { createI18n, getUiLang } from '@trivoffice/i18n'
 
 export const tMain = createI18n({
   zh: {

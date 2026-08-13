@@ -37,7 +37,7 @@ import {
   type TableModel,
   type TextboxDisplay,
   type TextboxParaPatch,
-} from '@genoffice/docx-engine'
+} from '@trivoffice/docx-engine'
 import { t } from '../i18n/locale'
 import { textHasComplexScript } from '../line-metrics'
 import { inlineMathML } from './equation'

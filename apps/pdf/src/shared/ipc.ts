@@ -1,5 +1,5 @@
-import type { Lang } from '@genoffice/i18n'
-import type { AiSettings, AiStreamChunk, AiStreamRequest } from '@genoffice/ai-provider'
+import type { Lang } from '@trivoffice/i18n'
+import type { AiSettings, AiStreamChunk, AiStreamRequest } from '@trivoffice/ai-provider'
 
 export const PDF_CHANNELS = {
   consumePending: 'pdf:consume-pending',
@@ -27,7 +27,7 @@ export const PDF_CHANNELS = {
   themeChanged: 'app:theme-changed',
 } as const
 
-export const VISUAL_SIGNATURE_CONTENT_PREFIX = 'GenOffice visual signature field: '
+export const VISUAL_SIGNATURE_CONTENT_PREFIX = 'TrivOffice visual signature field: '
 
 export type UiTheme = 'light' | 'dark' | 'system'
 
@@ -273,7 +273,7 @@ export interface PageImageRef {
   aboveText: boolean
 }
 
-/** Editable metadata for a GenOffice static form fill embedded as a page image. */
+/** Editable metadata for a TrivOffice static form fill embedded as a page image. */
 export interface StaticFormFillRecord {
   id: string
   kind: 'text' | 'check' | 'cross'
@@ -450,7 +450,7 @@ export interface PdfApi {
   listEditFonts(): Promise<string[]>
   /** Enumerate the content-stream images of every page (for image edit mode) */
   listPageImages(path: string): Promise<PageImageRef[]>
-  /** Read GenOffice static-fill metadata stored inside the PDF. */
+  /** Read TrivOffice static-fill metadata stored inside the PDF. */
   listStaticFormFills(path: string): Promise<StaticFormFillRecord[]>
   /** Render one existing image object to PNG (base64) for move/resize ghost previews; null if it can't be matched */
   pageImagePng(request: {

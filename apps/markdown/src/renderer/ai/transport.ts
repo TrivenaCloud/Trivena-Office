@@ -1,5 +1,5 @@
-import { createIpcTransport, type AgentTransport } from '@genoffice/agent-core'
-import type { AiSettings } from '@genoffice/ai-provider'
+import { createIpcTransport, type AgentTransport } from '@trivoffice/agent-core'
+import type { AiSettings } from '@trivoffice/ai-provider'
 import { t } from '../i18n/locale'
 
 /** The shared IPC transport wired to the markdown preload bridge (window.markdownApi). */

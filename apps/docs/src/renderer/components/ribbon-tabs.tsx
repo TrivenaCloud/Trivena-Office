@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Editor, JSONContent } from '@tiptap/core'
-import { SHAPE_GALLERY_GROUPS, wordArtSolidColor, type WordArtPreset } from '@genoffice/ui'
+import { SHAPE_GALLERY_GROUPS, wordArtSolidColor, type WordArtPreset } from '@trivoffice/ui'
 import {
   buildLineParagraphXml,
   buildShapeParagraphXml,
@@ -9,7 +9,7 @@ import {
   LINE_KINDS,
   type HeaderFooter,
   type TextboxDisplay,
-} from '@genoffice/docx-engine'
+} from '@trivoffice/docx-engine'
 import type { DocsTabInfo } from '../../shared/ipc'
 import { tableModelToPmNode } from '../editor/convert'
 import { isStraightLineKind } from '../editor/shape-svg'
@@ -1134,7 +1134,7 @@ export function ViewTab({
                     }}
                   >
                     {w.focused ? '✓ ' : ''}
-                    {w.title || 'GenOffice Docs'}
+                    {w.title || 'TrivOffice Docs'}
                   </button>
                 ))}
               </div>

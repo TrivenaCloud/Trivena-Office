@@ -1,4 +1,4 @@
-import type { ParsedDocFull, StyleDisplay, ThemeColors, ThemeFonts } from '@genoffice/docx-engine'
+import type { ParsedDocFull, StyleDisplay, ThemeColors, ThemeFonts } from '@trivoffice/docx-engine'
 import {
   cssDualFontFamily,
   cssFontFamily,

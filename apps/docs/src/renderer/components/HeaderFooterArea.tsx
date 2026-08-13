@@ -5,7 +5,7 @@ import {
   type HfImage,
   type HfParagraph,
   type Run,
-} from '@genoffice/docx-engine'
+} from '@trivoffice/docx-engine'
 import { useI18n } from '../i18n/locale'
 import { hfUsesLegacyHash } from '../editor/hf-dom'
 import { cssDualFontFamily, cssFontFamily } from '../line-metrics'

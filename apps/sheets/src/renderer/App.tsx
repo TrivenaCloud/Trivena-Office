@@ -104,8 +104,8 @@ import {
   COMPLETED_VIA_TOOLS_TEXT,
   composeSkills,
   type AgentImage,
-} from '@genoffice/agent-core'
-import type { AiSettings } from '@genoffice/ai-provider'
+} from '@trivoffice/agent-core'
+import type { AiSettings } from '@trivoffice/ai-provider'
 import { type WorkbookOperation } from '../domain/workbook-dsl'
 import { columnIndex, columnLabel, parseAddress, parseRange } from '../domain/cell-address'
 import {

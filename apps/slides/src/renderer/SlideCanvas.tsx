@@ -23,7 +23,7 @@ import type {
   TableRenderNode,
   PictureRenderNode,
   GroupRenderNode,
-} from '@genoffice/pptx-render'
+} from '@trivoffice/pptx-render'
 import { fillToKonva, isEditableText } from './konva-adapter'
 import {
   computeSnap,

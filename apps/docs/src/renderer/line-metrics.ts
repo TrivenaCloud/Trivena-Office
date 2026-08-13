@@ -23,7 +23,7 @@
  *   - space-before/space-after also align to the grid when a grid exists
  */
 
-import type { DocGrid } from '@genoffice/docx-engine'
+import type { DocGrid } from '@trivoffice/docx-engine'
 
 // ─── Font metrics interface (same interface as pptx-render/metrics.ts) ─────
 
@@ -97,7 +97,7 @@ export class HeuristicMetrics implements FontMetricsProvider {
 
 /** Korean font names (Windows/Noto/Source Han/Nanum faces + bundled subsets) */
 const KO_FONT_RE =
-  /malgun|맑은|batang|바탕|myeongjo|myungjo|명조|gungsuh|궁서|gulim|굴림|dotum|돋움|nanum|나눔|genoffice (sans|serif) kr|(noto|source han) (sans|serif)[^,]*\bk(r|orean)?\b/i
+  /malgun|맑은|batang|바탕|myeongjo|myungjo|명조|gungsuh|궁서|gulim|굴림|dotum|돋움|nanum|나눔|trivoffice (sans|serif) kr|(noto|source han) (sans|serif)[^,]*\bk(r|orean)?\b/i
 
 /**
  * Per-font single-spacing line-height factor, matched to the LibreOffice
@@ -275,10 +275,10 @@ export function computeLineHeight(
 export const BUNDLED_FONTS = new Set([
   'Noto Sans CJK SC',
   'Noto Serif CJK SC',
-  'GenOffice Sans KR',
-  'GenOffice Serif KR',
-  'GenOffice Fullwidth TC',
-  'GenOffice Songti SC',
+  'TrivOffice Sans KR',
+  'TrivOffice Serif KR',
+  'TrivOffice Fullwidth TC',
+  'TrivOffice Songti SC',
   'Carlito GO',
   'Caladea',
   'Liberation Serif',
@@ -339,11 +339,11 @@ export function cssFontFamily(font: string): string {
     f.includes('zhongsong')
   )
     return `${chain(font, 'STZhongsong', 'Songti SC', 'STSong', 'SimSun', CJK_SERIF)},serif`
-  // 'GenOffice Songti SC' (fonts.css local() alias of Songti SC): macOS Chromium
+  // 'TrivOffice Songti SC' (fonts.css local() alias of Songti SC): macOS Chromium
   // refuses synthetic bold for 'Songti SC' by name at weight 600/700; the alias,
   // registered weight-normal only, lets Blink synthesize. Unresolvable elsewhere.
   if (f.includes('simsun') || f.includes('宋体') || f.includes('nsimsun')) {
-    return `${chain(font, 'GenOffice Songti SC', 'STSong', 'SimSun', CJK_SERIF)},serif`
+    return `${chain(font, 'TrivOffice Songti SC', 'STSong', 'SimSun', CJK_SERIF)},serif`
   }
   if (f.includes('simhei') || f.includes('黑体') || f.includes('细黑') || f.includes('xihei'))
     return `${chain(font, 'Heiti SC', 'STHeiti', 'SimHei', 'PingFang SC', CJK_SANS)},sans-serif`
@@ -360,13 +360,13 @@ export function cssFontFamily(font: string): string {
   // Japanese/Korean/Traditional Chinese: fall back within the same script (win/mac family names as mutual backups) so Han glyphs don't render with Simplified forms
   const JA_SANS = ['Yu Gothic', 'Hiragino Sans', 'Meiryo', 'Noto Sans JP']
   const JA_SERIF = ['Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', 'Noto Serif JP']
-  const KO_SANS = ['Malgun Gothic', 'GenOffice Sans KR', 'Apple SD Gothic Neo', 'Noto Sans KR']
-  const KO_SERIF = ['Batang', 'GenOffice Serif KR', 'AppleMyungjo', 'Noto Serif KR']
+  const KO_SANS = ['Malgun Gothic', 'TrivOffice Sans KR', 'Apple SD Gothic Neo', 'Noto Sans KR']
+  const KO_SERIF = ['Batang', 'TrivOffice Serif KR', 'AppleMyungjo', 'Noto Serif KR']
   const TC_SANS = ['Microsoft JhengHei', 'PingFang TC', 'Heiti TC', 'Noto Sans TC']
-  // 'GenOffice Fullwidth TC' (fonts.css): fullwidth U+FF0D/FF0F/FF3C/FF3F/FF5E whose Songti TC glyphs look half-width
-  const TC_SERIF = ['PMingLiU', 'MingLiU', 'GenOffice Fullwidth TC', 'Songti TC', 'Noto Serif TC']
+  // 'TrivOffice Fullwidth TC' (fonts.css): fullwidth U+FF0D/FF0F/FF3C/FF3F/FF5E whose Songti TC glyphs look half-width
+  const TC_SERIF = ['PMingLiU', 'MingLiU', 'TrivOffice Fullwidth TC', 'Songti TC', 'Noto Serif TC']
   const SC_SANS = ['PingFang SC', 'Microsoft YaHei', CJK_SANS]
-  const SC_SERIF = ['GenOffice Songti SC', 'STSong', 'SimSun', CJK_SERIF]
+  const SC_SERIF = ['TrivOffice Songti SC', 'STSong', 'SimSun', CJK_SERIF]
   const nfkc = font.normalize('NFKC')
   // Arabic: bundled Noto subsets stand in for missing fonts; Chromium's silent
   // fallback is a Geeza Pro-style UI face, larger and heavier than the naskh

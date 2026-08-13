@@ -5,7 +5,7 @@ import {} from '@tiptap/pm/tables'
 import { cssCsFontFamily, cssDualFontFamily, cssFontFamily } from '../line-metrics'
 import { isEastAsianFontName } from '../font-list'
 import { t } from '../i18n/locale'
-import {} from '@genoffice/docx-engine'
+import {} from '@trivoffice/docx-engine'
 
 /**
  * Custom schema mirroring the docx-engine Block model 1:1.
@@ -362,8 +362,8 @@ export function fontAttrsFromFamilyChain(chain: string | undefined): Record<stri
       (x) =>
         x &&
         !/^(serif|sans-serif|monospace|cursive|fantasy|system-ui)$/i.test(x) &&
-        // internal fonts.css aliases (GenOffice Songti SC etc.) are not user picks
-        !/^genoffice /i.test(x),
+        // internal fonts.css aliases (TrivOffice Songti SC etc.) are not user picks
+        !/^trivoffice /i.test(x),
     )
   const ea = families.find(
     (f, i) => isEastAsianFontName(f) && (i === 0 || !/^noto (sans|serif) cjk sc$/i.test(f)),

@@ -1,13 +1,13 @@
 {
-  "name": "@genoffice/shell",
-  "productName": "GenOffice",
+  "name": "@trivoffice/shell",
+  "productName": "TrivOffice",
   "version": "0.6.0",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/genspark-ai/genoffice",
+  "homepage": "https://github.com/TrivenaCloud/Trivena-Office",
   "private": true,
-  "description": "Unified GenOffice shell: one app hosting the docs and sheets modules behind a home/launcher window",
+  "description": "Unified TrivOffice shell: one app hosting the docs and sheets modules behind a home/launcher window",
   "main": "out/main/index.js",
-  "desktopName": "genoffice.desktop",
+  "desktopName": "trivoffice.desktop",
   "scripts": {
     "dev": "electron-vite dev --watch",
     "build": "electron-vite build",
@@ -19,18 +19,18 @@
     "dist:linux": "electron-vite build && electron-builder --linux"
   },
   "devDependencies": {
-    "@genoffice/agent-core": "*",
-    "@genoffice/ai-provider": "*",
-    "@genoffice/ai-search": "*",
-    "@genoffice/docs": "*",
-    "@genoffice/docx-engine": "*",
-    "@genoffice/electron-utils": "*",
-    "@genoffice/i18n": "*",
-    "@genoffice/pptx-engine": "*",
-    "@genoffice/pptx-render": "*",
-    "@genoffice/sheets": "*",
-    "@genoffice/slides": "*",
-    "@genoffice/ui": "*",
+    "@trivoffice/agent-core": "*",
+    "@trivoffice/ai-provider": "*",
+    "@trivoffice/ai-search": "*",
+    "@trivoffice/docs": "*",
+    "@trivoffice/docx-engine": "*",
+    "@trivoffice/electron-utils": "*",
+    "@trivoffice/i18n": "*",
+    "@trivoffice/pptx-engine": "*",
+    "@trivoffice/pptx-render": "*",
+    "@trivoffice/sheets": "*",
+    "@trivoffice/slides": "*",
+    "@trivoffice/ui": "*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
@@ -44,5 +44,5 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.10"
   },
-  "author": "GenOffice"
+  "author": "TrivOffice"
 }

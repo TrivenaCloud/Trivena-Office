@@ -1,8 +1,8 @@
 /**
- * GenOffice's own Genspark identity: device-code login (office_addin_auth,
- * app_type=genoffice) minting a gsk API key named "genoffice" — the key_name
+ * TrivOffice's own Genspark identity: device-code login (office_addin_auth,
+ * app_type=trivoffice) minting a gsk API key named "trivoffice" — the key_name
  * lands in billing as billing_tag, attributing all traffic (incl. gsk CLI
- * subprocesses) to GenOffice. Stored in ~/.genoffice/auth.json, deliberately
+ * subprocesses) to TrivOffice. Stored in ~/.trivoffice/auth.json, deliberately
  * NOT the shared config.json that Claw Desktop overwrites on every launch.
  *
  * Flow: POST /device_code → browser approve → poll /token for a 30-day Bearer
@@ -88,7 +88,7 @@ async function proxyFallbackFetch(): Promise<typeof fetch | null> {
         session?: { fromPartition: (partition: string) => ProxySession }
       }
       if (session) {
-        const ses = session.fromPartition('genoffice-login-proxy')
+        const ses = session.fromPartition('trivoffice-login-proxy')
         await ses.setProxy({ proxyRules: proxyUrl })
         impl = ses.fetch.bind(ses)
       }
@@ -108,9 +108,9 @@ async function loginFetchChannels(): Promise<(typeof fetch)[]> {
   return proxyFallbackPreferred ? [fallback, primary] : [primary, fallback]
 }
 
-/** Override dir via GENOFFICE_AUTH_DIR (test isolation). */
-export function genofficeAuthPath(): string {
-  return join(process.env.GENOFFICE_AUTH_DIR || join(homedir(), '.genoffice'), 'auth.json')
+/** Override dir via TRIVOFFICE_AUTH_DIR (test isolation). */
+export function trivofficeAuthPath(): string {
+  return join(process.env.TRIVOFFICE_AUTH_DIR || join(homedir(), '.trivoffice'), 'auth.json')
 }
 
 export interface GenofficeAuth {
@@ -123,7 +123,7 @@ let cachedAuth: GenofficeAuth | null | undefined
 
 function readAuthFile(): GenofficeAuth | null {
   try {
-    const raw = asRecord(JSON.parse(readFileSync(genofficeAuthPath(), 'utf-8')))
+    const raw = asRecord(JSON.parse(readFileSync(trivofficeAuthPath(), 'utf-8')))
     if (typeof raw.api_key !== 'string' || !raw.api_key) return null
     return {
       apiKey: raw.api_key,
@@ -142,13 +142,13 @@ export function loadGenofficeAuth(): GenofficeAuth | null {
   return cachedAuth
 }
 
-/** The GenOffice-named api key; '' when not signed in. Cached (invalidated by login/logout). */
-export function genofficeApiKey(): string {
+/** The TrivOffice-named api key; '' when not signed in. Cached (invalidated by login/logout). */
+export function trivofficeApiKey(): string {
   return loadGenofficeAuth()?.apiKey ?? ''
 }
 
 function saveAuth(auth: GenofficeAuth): void {
-  const path = genofficeAuthPath()
+  const path = trivofficeAuthPath()
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(
     path,
@@ -164,7 +164,7 @@ function saveAuth(auth: GenofficeAuth): void {
 
 function clearAuth(): void {
   try {
-    if (existsSync(genofficeAuthPath())) unlinkSync(genofficeAuthPath())
+    if (existsSync(trivofficeAuthPath())) unlinkSync(trivofficeAuthPath())
   } catch {
     /* local sign-out must not throw */
   }
@@ -333,11 +333,11 @@ async function runDeviceLogin(
 let activeLogin: { cancel: () => void } | null = null
 
 /**
- * Starts the GenOffice device-code login, cancelling a previous in-flight one
+ * Starts the TrivOffice device-code login, cancelling a previous in-flight one
  * (its device code would otherwise be approved into a dead flow). The caller
  * opens `url` in the system browser. Returns whether the flow was started.
  */
-export function startGenofficeLogin(onEvent?: (progress: GskLoginProgress) => void): boolean {
+export function startTrivofficeLogin(onEvent?: (progress: GskLoginProgress) => void): boolean {
   activeLogin?.cancel()
   const emit = onEvent ?? (() => {})
   const controller = new AbortController()
@@ -369,8 +369,8 @@ export function startGenofficeLogin(onEvent?: (progress: GskLoginProgress) => vo
   return true
 }
 
-/** True while a login started via startGenofficeLogin is in flight. */
-export function genofficeLoginInFlight(): boolean {
+/** True while a login started via startTrivofficeLogin is in flight. */
+export function trivofficeLoginInFlight(): boolean {
   return activeLogin !== null
 }
 
@@ -379,19 +379,19 @@ export function genofficeLoginInFlight(): boolean {
  * in-flight flow (restarting would strand it on a dead device code); openUrl
  * is the caller's browser opener (this module is Electron-free).
  */
-export function ensureGenofficeLogin(openUrl: (url: string) => void): void {
-  if (genofficeLoginInFlight()) return
-  startGenofficeLogin((progress) => {
+export function ensureTrivofficeLogin(openUrl: (url: string) => void): void {
+  if (trivofficeLoginInFlight()) return
+  startTrivofficeLogin((progress) => {
     if (progress.url) openUrl(progress.url)
   })
 }
 
 /**
- * Signs out of GenOffice only: best-effort server-side revoke of the
- * genoffice key, then local removal. The shared gsk CLI login
+ * Signs out of TrivOffice only: best-effort server-side revoke of the
+ * trivoffice key, then local removal. The shared gsk CLI login
  * (~/.genspark-tool-cli) is untouched — terminal gsk and Claw keep working.
  */
-export async function genofficeLogout(): Promise<void> {
+export async function trivofficeLogout(): Promise<void> {
   const auth = loadGenofficeAuth()
   if (auth?.accessToken && auth.keyId) {
     const controller = new AbortController()
@@ -416,6 +416,6 @@ export function resetGenofficeAuthCache(): void {
 }
 
 /** Test hook: whether the proxy fallback channel is currently preferred. */
-export function genofficeProxyFallbackPreferred(): boolean {
+export function trivofficeProxyFallbackPreferred(): boolean {
   return proxyFallbackPreferred
 }

@@ -1,4 +1,4 @@
-import type { RenderNode } from '@genoffice/pptx-render'
+import type { RenderNode } from '@trivoffice/pptx-render'
 
 export type ContextElementType = 'table' | 'chart' | 'picture' | 'shape' | 'textShape' | null
 export type ContextTab = 'tableDesign' | 'chartDesign' | 'pictureFormat'

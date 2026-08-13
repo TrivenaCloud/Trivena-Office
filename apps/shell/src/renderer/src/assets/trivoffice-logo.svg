@@ -1,0 +1,11 @@
+<svg width="1091" height="240" viewBox="0 0 1091 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mark -->
+  <g>
+    <rect width="240" height="240" rx="54" fill="black"/>
+    <rect x="51" y="46" width="90" height="108" rx="16" fill="white"/>
+    <rect x="99" y="86" width="90" height="108" rx="16" fill="white"/>
+    <path d="M99 102C99 93.1634 106.163 86 115 86H141V138C141 146.837 133.837 154 125 154H99V102Z" fill="black"/>
+  </g>
+  <!-- Wordmark: TrivOffice -->
+  <text x="280" y="158" fill="black" font-family="Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-2">TrivOffice</text>
+</svg>

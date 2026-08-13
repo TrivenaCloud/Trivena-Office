@@ -1,5 +1,5 @@
 /**
- * Shared main-process state for GenOffice Slides, extracted from slides-main.ts so
+ * Shared main-process state for TrivOffice Slides, extracted from slides-main.ts so
  * the IPC modules (slides-main, ai-ipc, presenter-show) can share it:
  * per-renderer sessions, snapshot undo/redo history, runtime paths, window
  * references, and RenderSlide rebuild helpers.
@@ -7,12 +7,12 @@
 import { BrowserWindow, webContents } from 'electron'
 import type { WebContents } from 'electron'
 import { join } from 'node:path'
-import { materializeSlide, type OpenedPptx, type Slide } from '@genoffice/pptx-engine'
+import { materializeSlide, type OpenedPptx, type Slide } from '@trivoffice/pptx-engine'
 import {
   buildRenderSlide,
   type FontMetricsProvider,
   type RenderSlide,
-} from '@genoffice/pptx-render'
+} from '@trivoffice/pptx-render'
 import { createSystemFontMetrics } from './fonts'
 import { tiffToPng } from './tiff-decode'
 

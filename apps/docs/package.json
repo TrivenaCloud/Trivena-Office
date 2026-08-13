@@ -1,6 +1,6 @@
 {
-  "name": "@genoffice/docs",
-  "productName": "GenOffice Docs",
+  "name": "@trivoffice/docs",
+  "productName": "TrivOffice Docs",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -18,14 +18,14 @@
     "dist:dir": "electron-vite build && electron-builder --dir"
   },
   "devDependencies": {
-    "@genoffice/agent-core": "*",
-    "@genoffice/i18n": "*",
-    "@genoffice/ai-provider": "*",
-    "@genoffice/ai-search": "*",
-    "@genoffice/docx-engine": "*",
-    "@genoffice/file-parse": "*",
-    "@genoffice/project-store": "*",
-    "@genoffice/ui": "*",
+    "@trivoffice/agent-core": "*",
+    "@trivoffice/i18n": "*",
+    "@trivoffice/ai-provider": "*",
+    "@trivoffice/ai-search": "*",
+    "@trivoffice/docx-engine": "*",
+    "@trivoffice/file-parse": "*",
+    "@trivoffice/project-store": "*",
+    "@trivoffice/ui": "*",
     "@tiptap/core": "^3.28.0",
     "@tiptap/extensions": "^3.28.0",
     "@tiptap/pm": "^3.28.0",
@@ -46,10 +46,10 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.0"
   },
-  "author": "GenOffice",
+  "author": "TrivOffice",
   "build": {
-    "appId": "com.genoffice.docs",
-    "productName": "GenOffice Docs",
+    "appId": "com.trivoffice.docs",
+    "productName": "TrivOffice Docs",
     "electronVersion": "43.3.0",
     "artifactName": "AIDocx-${version}-${arch}.${ext}",
     "directories": {
@@ -90,10 +90,10 @@
     }
   },
   "dependencies": {
-    "@genoffice/electron-utils": "*",
-    "@genoffice/font-metrics": "*",
+    "@trivoffice/electron-utils": "*",
+    "@trivoffice/font-metrics": "*",
     "electron-updater": "^6.8.9",
     "pdf-lib": "^1.17.1",
-    "@genoffice/pptx-render": "*"
+    "@trivoffice/pptx-render": "*"
   }
 }

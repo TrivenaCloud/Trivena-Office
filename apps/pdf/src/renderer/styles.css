@@ -1,4 +1,4 @@
-/* Shared chrome/AI-panel tokens come from @genoffice/ui/tokens.css (imported
+/* Shared chrome/AI-panel tokens come from @trivoffice/ui/tokens.css (imported
  * before this file in main.tsx); only pdf-specific values live here. */
 :root {
   --accent: #c43e1c;
@@ -287,7 +287,7 @@ button {
   overflow-x: scroll;
   overflow-y: hidden;
   /* Slim visible scrollbar so mouse users can reach overflowed groups
-     (genspark-ai/genoffice#55). Its 5px lane is carved out of the bottom
+     (genspark-ai/trivoffice#55). Its 5px lane is carved out of the bottom
      padding, keeping the 80px band and the content area unchanged; Chromium
      paints a thumb only while the row actually overflows. */
   padding-bottom: 1px;

@@ -8,11 +8,11 @@ body:
       label: App
       description: Which part of the suite is affected?
       options:
-        - GenOffice Docs (docs)
-        - GenOffice Sheets (sheets)
-        - GenOffice Slides (slides)
-        - GenOffice PDF (pdf)
-        - GenOffice Markdown (markdown)
+        - TrivOffice Docs (docs)
+        - TrivOffice Sheets (sheets)
+        - TrivOffice Slides (slides)
+        - TrivOffice PDF (pdf)
+        - TrivOffice Markdown (markdown)
         - Shell / home screen
         - AI panel / providers
         - Build / packaging

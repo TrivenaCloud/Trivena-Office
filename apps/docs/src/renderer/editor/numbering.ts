@@ -7,4 +7,4 @@ export {
   formatNumber,
   type ListItemRef,
   type ListMarkerInfo,
-} from '@genoffice/docx-engine'
+} from '@trivoffice/docx-engine'

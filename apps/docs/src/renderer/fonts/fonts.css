@@ -162,14 +162,14 @@
  * sans Basic Latin matches Malgun (tools/normalize-kr-sans-hmtx.py).
  */
 @font-face {
-  font-family: 'GenOffice Sans KR';
-  src: url('./GenOfficeSansKR-Regular-subset.woff2') format('woff2');
+  font-family: 'TrivOffice Sans KR';
+  src: url('./TrivOfficeSansKR-Regular-subset.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: 'GenOffice Serif KR';
-  src: url('./GenOfficeSerifKR-Regular-subset.woff2') format('woff2');
+  font-family: 'TrivOffice Serif KR';
+  src: url('./TrivOfficeSerifKR-Regular-subset.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
@@ -210,7 +210,7 @@
  * half-width slash. Serve them from the bundled Noto subset (ink matches
  * PMingLiU); real PMingLiU still precedes this face in the TC serif chain. */
 @font-face {
-  font-family: 'GenOffice Fullwidth TC';
+  font-family: 'TrivOffice Fullwidth TC';
   src: url('./NotoSerifCJKsc-Regular-subset.woff2') format('woff2');
   unicode-range: U+FF0D, U+FF0F, U+FF3C, U+FF3F, U+FF5E;
   font-weight: normal;
@@ -222,7 +222,7 @@
  * at weight normal only, forces Blink to synthesize bold at >=600. On Windows the
  * local() sources don't resolve and the chain falls through to SimSun. */
 @font-face {
-  font-family: 'GenOffice Songti SC';
+  font-family: 'TrivOffice Songti SC';
   src: local('STSongti-SC-Regular'), local('Songti SC Regular');
   font-weight: normal;
   font-style: normal;
@@ -232,14 +232,14 @@
  * through to AppleMyungjo, whose U+2082 is a full-width (1.0em) glyph —
  * "Cu₂O" rendered as "Cu₂ O". Serve them from bundled latin faces instead. */
 @font-face {
-  font-family: 'GenOffice Sans KR';
+  font-family: 'TrivOffice Sans KR';
   src: url('./Carlito-Regular.ttf') format('truetype');
   unicode-range: U+2070-209F, U+00B2-00B3, U+00B9;
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: 'GenOffice Serif KR';
+  font-family: 'TrivOffice Serif KR';
   /* Carlito, not Caladea/LiberationSerif: only Carlito covers the whole block */
   src: url('./Carlito-Regular.ttf') format('truetype');
   unicode-range: U+2070-209F, U+00B2-00B3, U+00B9;

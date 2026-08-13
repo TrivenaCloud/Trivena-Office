@@ -14,7 +14,7 @@ export interface PickImageResult {
   name: string
 }
 
-// ---- AI provider settings/config/streaming: canonical types live in @genoffice/ai-provider ----
+// ---- AI provider settings/config/streaming: canonical types live in @trivoffice/ai-provider ----
 
 import type {
   AiChatRequest,
@@ -23,8 +23,8 @@ import type {
   AiStreamChunk,
   AiStreamRequest,
   GenSparkAccountStatus,
-} from '@genoffice/ai-provider'
-import type { FaceVerticalMetrics } from '@genoffice/font-metrics'
+} from '@trivoffice/ai-provider'
+import type { FaceVerticalMetrics } from '@trivoffice/font-metrics'
 
 export type { FaceVerticalMetrics }
 
@@ -38,17 +38,17 @@ export type {
   AiStreamChunk,
   AiStreamRequest,
   GenSparkAccountStatus,
-} from '@genoffice/ai-provider'
-export { AI_PROVIDERS } from '@genoffice/ai-provider'
+} from '@trivoffice/ai-provider'
+export { AI_PROVIDERS } from '@trivoffice/ai-provider'
 
-// ---- agent protocol: canonical types live in @genoffice/agent-core ----
+// ---- agent protocol: canonical types live in @trivoffice/agent-core ----
 
 export type {
   AgentMessage,
   AgentToolCall,
   AgentToolDef,
   AgentToolResult,
-} from '@genoffice/agent-core'
+} from '@trivoffice/agent-core'
 
 // ---- chat attachments (local files fed to the agent via tools) ----
 

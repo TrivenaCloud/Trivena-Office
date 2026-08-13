@@ -85,7 +85,7 @@ import {
   runsToColors,
   spliceCharColors,
 } from './color-runs'
-import { platformShortcuts } from '@genoffice/i18n'
+import { platformShortcuts } from '@trivoffice/i18n'
 import { useI18n } from './i18n/locale'
 import { useAutosave } from './useAutosave'
 import { EDIT_FONTS } from '../shared/ipc'
@@ -139,7 +139,7 @@ const MAX_SCALE = ZOOM_STEPS[ZOOM_STEPS.length - 1]
 const PAGE_GAP = 16
 const SCROLL_PAD = 24
 // ── Sidebar (thumbnails / outline) width: drag the divider to resize; persisted ──
-const SIDEBAR_W_KEY = 'genoffice-pdf-sidebar-width'
+const SIDEBAR_W_KEY = 'trivoffice-pdf-sidebar-width'
 const SIDEBAR_W_DEFAULT = 150
 const SIDEBAR_W_MIN = 120
 /** pane padding (10px × 2) + thumb box borders (2px × 2) */

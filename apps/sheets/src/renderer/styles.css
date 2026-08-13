@@ -1,6 +1,6 @@
 /* Per-app accent (excel-green family) + sheets-only tokens.
  * Chrome tokens (surface/text/border/…, AI panel --color-*) come from
- * @genoffice/ui/tokens.css; nothing here may shadow those names. */
+ * @trivoffice/ui/tokens.css; nothing here may shadow those names. */
 :root {
   --excel-green: #217346;
   --excel-green-dark: #185c37;
@@ -568,7 +568,7 @@ textarea:disabled {
   overflow-x: scroll;
   overflow-y: hidden;
   /* Slim visible scrollbar so mouse users can reach overflowed groups
-     (genspark-ai/genoffice#55). Its 5px lane is carved out of the bottom
+     (genspark-ai/trivoffice#55). Its 5px lane is carved out of the bottom
      padding, keeping the 80px band and the content area unchanged; Chromium
      paints a thumb only while the row actually overflows. */
   padding: 6px 12px 1px;

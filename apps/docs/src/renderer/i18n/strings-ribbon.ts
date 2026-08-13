@@ -1,4 +1,4 @@
-import { defineStrings } from '@genoffice/i18n'
+import { defineStrings } from '@trivoffice/i18n'
 
 /** Strings for Ribbon / ribbon-tabs / icons */
 export const ribbonStrings = defineStrings({
