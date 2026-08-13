@@ -240,7 +240,9 @@ const config = {
     // Skip notarization when Apple credentials are absent (forks / CI smoke packs).
     notarize: Boolean(
       process.env.APPLE_KEYCHAIN_PROFILE ||
-        (process.env.APPLE_ID && process.env.APPLE_APP_SPECIFIC_PASSWORD && process.env.APPLE_TEAM_ID),
+      (process.env.APPLE_ID &&
+        process.env.APPLE_APP_SPECIFIC_PASSWORD &&
+        process.env.APPLE_TEAM_ID),
     ),
     extraResources: [
       {

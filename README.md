@@ -29,14 +29,14 @@ npm run dist:linux   # AppImage + deb + rpm
 
 ## Apps
 
-| App             | Product                 | What it is |
-| --------------- | ----------------------- | ---------- |
+| App             | Product                 | What it is                                             |
+| --------------- | ----------------------- | ------------------------------------------------------ |
 | `apps/docs`     | **TrivOffice Docs**     | `.docx` word processor with byte-preserving round trip |
-| `apps/sheets`   | **TrivOffice Sheets**   | `.xlsx` spreadsheet (Univer UI + Rust xlsx sidecar) |
-| `apps/slides`   | **TrivOffice Slides**   | `.pptx` presentations (in-house engine + Konva) |
-| `apps/pdf`      | **TrivOffice PDF**      | Real PDF text/image editing (pdf.js + PDFium wasm) |
-| `apps/markdown` | **TrivOffice Markdown** | `.md` / `.markdown` block editor |
-| `apps/shell`    | **TrivOffice**          | Suite shell: home, tabs, theme, auto-update |
+| `apps/sheets`   | **TrivOffice Sheets**   | `.xlsx` spreadsheet (Univer UI + Rust xlsx sidecar)    |
+| `apps/slides`   | **TrivOffice Slides**   | `.pptx` presentations (in-house engine + Konva)        |
+| `apps/pdf`      | **TrivOffice PDF**      | Real PDF text/image editing (pdf.js + PDFium wasm)     |
+| `apps/markdown` | **TrivOffice Markdown** | `.md` / `.markdown` block editor                       |
+| `apps/shell`    | **TrivOffice**          | Suite shell: home, tabs, theme, auto-update            |
 
 **AI backend (Genspark).** Sign-in uses a Genspark device-code flow; model calls
 and agent tools (search, image generation, media analysis) route through the

@@ -83,7 +83,9 @@ describe('fontAttrsFromFamilyChain', () => {
 
   it('skips internal TrivOffice aliases even at the chain head', () => {
     expect(
-      fontAttrsFromFamilyChain("'TrivOffice Songti SC','STSong','SimSun','Noto Serif CJK SC',serif"),
+      fontAttrsFromFamilyChain(
+        "'TrivOffice Songti SC','STSong','SimSun','Noto Serif CJK SC',serif",
+      ),
     ).toEqual({ font: 'STSong' })
   })
 

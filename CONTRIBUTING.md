@@ -99,10 +99,10 @@ testing and local overrides:
 
 | Variable                                                 | Effect                                                                 |
 | -------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `TRIVOFFICE_USER_DATA`                                    | Override the Electron userData directory (test isolation)              |
-| `TRIVOFFICE_LANG`                                         | Force the UI language instead of following the OS locale               |
-| `TRIVOFFICE_FAKE_UPDATE`                                  | Exercise the updater UI without a real release feed                    |
-| `TRIVOFFICE_CLOUD_SLIDE`, `TRIVOFFICE_CLOUD_SLIDE_TIER`    | Route slide generation through the cloud endpoint                      |
+| `TRIVOFFICE_USER_DATA`                                   | Override the Electron userData directory (test isolation)              |
+| `TRIVOFFICE_LANG`                                        | Force the UI language instead of following the OS locale               |
+| `TRIVOFFICE_FAKE_UPDATE`                                 | Exercise the updater UI without a real release feed                    |
+| `TRIVOFFICE_CLOUD_SLIDE`, `TRIVOFFICE_CLOUD_SLIDE_TIER`  | Route slide generation through the cloud endpoint                      |
 | `GSK_API_KEY`, `GSK_CLI_PATH`                            | Genspark credentials / CLI location for the built-in AI provider       |
 | `AI_SEARCH_DISABLE_GSK`, `SERPER_API_KEY`                | Disable the gsk search backend / supply a Serper key instead           |
 | `XLSX_SIDECAR_PATH`, `XLSX_OPEN_PATH`, `XLSX_DEBUG_PORT` | Point at a locally built xlsx sidecar and its debug port               |

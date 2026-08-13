@@ -21,7 +21,9 @@ const TIPTAP_DEDUPE = [
 export default defineConfig({
   // @trivoffice/i18n and @trivoffice/electron-utils ship as TS source — must be bundled
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['@trivoffice/i18n', '@trivoffice/electron-utils'] })],
+    plugins: [
+      externalizeDepsPlugin({ exclude: ['@trivoffice/i18n', '@trivoffice/electron-utils'] }),
+    ],
   },
   preload: {
     plugins: [externalizeDepsPlugin({ exclude: ['@trivoffice/i18n'] })],

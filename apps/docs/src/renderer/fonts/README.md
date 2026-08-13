@@ -49,8 +49,8 @@ chain order; advances are 1.0em everywhere, so line breaking is unchanged.
 
 ## Korean fallback
 
-| Font                              | Role                                             |
-| --------------------------------- | ------------------------------------------------ |
+| Font                               | Role                                             |
+| ---------------------------------- | ------------------------------------------------ |
 | TrivOffice Serif KR (subset woff2) | Batang-metric stand-in for Korean serif families |
 | TrivOffice Sans KR (subset woff2)  | fallback for Korean sans families (Malgun etc.)  |
 

@@ -17,7 +17,9 @@ export default defineConfig({
   // (same setup as apps/slides).
   main: {
     plugins: [
-      externalizeDepsPlugin({ exclude: ['@trivoffice/electron-utils', '@trivoffice/font-metrics'] }),
+      externalizeDepsPlugin({
+        exclude: ['@trivoffice/electron-utils', '@trivoffice/font-metrics'],
+      }),
     ],
     resolve: { alias: localAlias },
   },

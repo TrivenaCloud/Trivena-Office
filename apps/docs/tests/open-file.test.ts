@@ -12,6 +12,8 @@ describe('findDocxPath', () => {
   })
 
   it('ignores Electron switches and unrelated files', () => {
-    expect(findDocxPath(['TrivOffice Docs', '--inspect=document.docx', '/tmp/notes.txt'])).toBeNull()
+    expect(
+      findDocxPath(['TrivOffice Docs', '--inspect=document.docx', '/tmp/notes.txt']),
+    ).toBeNull()
   })
 })
