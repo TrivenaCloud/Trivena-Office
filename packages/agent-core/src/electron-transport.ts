@@ -31,6 +31,7 @@ export interface IpcStreamStart<S> {
   system: string
   messages: AgentMessage[]
   tools: AgentToolDef[]
+  toolChoice?: 'auto' | 'required' | 'none'
 }
 
 /**
@@ -121,6 +122,7 @@ export function createIpcTransport<S>(options: IpcTransportOptions<S>): AgentTra
             system: request.system,
             messages: request.messages,
             tools: request.tools,
+            ...(request.toolChoice ? { toolChoice: request.toolChoice } : {}),
           }),
         ).catch((err: unknown) => {
           fail(err instanceof Error ? err.message : options.unknownErrorText())

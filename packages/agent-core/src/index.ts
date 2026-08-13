@@ -5,6 +5,7 @@ export type {
   AgentStreamHandle,
   AgentStreamRequest,
   AgentToolCall,
+  AgentToolChoice,
   AgentToolDef,
   AgentToolResult,
   AgentTransport,

@@ -55,6 +55,8 @@ export interface AiStreamRequest {
   messages: AgentMessage[]
   tools?: AgentToolDef[]
   maxTokens?: number
+  /** OpenAI-compatible tool_choice (needed so Gemini actually emits tool_calls). */
+  toolChoice?: 'auto' | 'required' | 'none'
 }
 
 export interface AiStreamChunk {

@@ -81,6 +81,31 @@ const STALE_TOOL_OUTPUT_MAX = 1_000
 /** Cap on consecutive tool-input parse failures (a successful parse resets it); abort beyond it (keeps the model from burning turns on bad JSON) */
 const MAX_INPUT_PARSE_RETRIES = 3
 
+/**
+ * Cap on "plan-only" recoveries: Gemini (and some OpenAI-compatible hosts) often
+ * narrate the next edit instead of emitting tool_calls. We nudge + require tools
+ * a few times before accepting a text-only finish with no document mutation.
+ */
+const MAX_PLAN_ONLY_NUDGES = 2
+
+const PLAN_ONLY_NUDGE =
+  '[System] Do not only describe the plan. You must call document tools now to apply the requested changes. ' +
+  'Call the tools immediately in this turn; a short summary comes only after the edits are done.'
+
+/** Detect "I'll polish the doc…" style replies that never emit tool_calls (common with Gemini). */
+function looksLikePlanOnly(text: string): boolean {
+  const t = text.trim()
+  if (t.length < 24) return false
+  return (
+    /^(ik zal|ik ga |i will\b|i'll\b|i am going\b|i'm going\b|laat me\b|let me\b|ik begin\b|i begin\b)/i.test(
+      t,
+    ) ||
+    /\b(ik begin met|i'll start with|i will start with|werken door|work through|doornemen)\b/i.test(
+      t,
+    )
+  )
+}
+
 const TURN_LIMIT_NOTE =
   '[System] The tool-call turn limit for this request has been reached; no more tools may be called this turn. ' +
   'Answer directly from the information already gathered; if the task is unfinished, briefly state what is done and what remains.'
@@ -169,6 +194,10 @@ export class AgentLoop<TSnapshot = unknown> {
   private finalizing = false
   private mutationSeen = false
   private inputParseFails = 0
+  /** How many times we recovered from a text-only turn that never mutated the artifact. */
+  private planOnlyNudges = 0
+  /** Next transport turn should force tool_choice=required (Gemini plan-only recovery). */
+  private forceToolChoiceRequired = false
   private turnStopReason: string | null = null
   private turnText = ''
   private toolCalls: AgentToolCall[] = []
@@ -238,6 +267,8 @@ export class AgentLoop<TSnapshot = unknown> {
     this.finalizing = false
     this.mutationSeen = false
     this.inputParseFails = 0
+    this.planOnlyNudges = 0
+    this.forceToolChoiceRequired = false
     this.abortController = new AbortController()
     const context = this.options.skill.buildContext?.() ?? ''
     const format =
@@ -463,11 +494,17 @@ export class AgentLoop<TSnapshot = unknown> {
     this.turnStopReason = null
     // Some transports emit an extra onDone after cancel — this turn may finalize only once
     let settled = false
+    const requireTools =
+      !this.finalizing &&
+      this.options.skill.tools.length > 0 &&
+      (this.forceToolChoiceRequired || (!this.mutationSeen && this.turns === 0))
+    this.forceToolChoiceRequired = false
     this.handle = this.options.transport.stream(
       {
         system: this.options.skill.systemPrompt + (this.options.systemSuffix?.() ?? ''),
         messages: [...this.history],
         tools: this.finalizing ? [] : this.options.skill.tools,
+        ...(requireTools ? { toolChoice: 'required' as const } : {}),
       },
       {
         onDelta: (text) => {
@@ -507,6 +544,30 @@ export class AgentLoop<TSnapshot = unknown> {
     // no-tools finalizing turn after hitting the limit
     // (a cancelled turn drops its tool calls — no results would follow)
     if (toolCalls.length === 0 || this.cancelled || this.finalizing) {
+      // Gemini often returns a plan in plain text and stop without tool_calls.
+      // If nothing has mutated yet, nudge and force tool_choice=required instead
+      // of ending the run (matches the "Ik zal het document doornemen…" hang).
+      // Only recover after the model already used tools (e.g. read) then
+      // narrated a plan — pure Q&A / short finals must still end normally.
+      const hadToolResults = this.history.some((m) => m.role === 'tool')
+      if (
+        !this.cancelled &&
+        !this.finalizing &&
+        !this.mutationSeen &&
+        hadToolResults &&
+        looksLikePlanOnly(this.turnText) &&
+        this.options.skill.tools.length > 0 &&
+        this.planOnlyNudges < MAX_PLAN_ONLY_NUDGES
+      ) {
+        this.planOnlyNudges++
+        this.forceToolChoiceRequired = true
+        this.history.push({ role: 'assistant', text: this.turnText || COMPLETED_VIA_TOOLS_TEXT })
+        this.history.push({ role: 'user', text: PLAN_ONLY_NUDGE })
+        this.turns++
+        events?.onTurnEnd?.()
+        this.startTurn()
+        return
+      }
       // Models often end a tool-using run with an empty text turn ("I'm done").
       // Leaving assistant text empty in history then poisons the next user
       // prompt: Anthropic rejects empty content arrays, Gemini rejects empty

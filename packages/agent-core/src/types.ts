@@ -83,10 +83,15 @@ export interface AgentPhase {
 
 // ---- LLM transport (how one model turn is streamed; app supplies the impl) ----
 
+/** OpenAI-compatible tool_choice; Gemini often ignores tools unless "required". */
+export type AgentToolChoice = 'auto' | 'required' | 'none'
+
 export interface AgentStreamRequest {
   system: string
   messages: AgentMessage[]
   tools: AgentToolDef[]
+  /** When set, forwarded to OpenAI-compatible providers as tool_choice. */
+  toolChoice?: AgentToolChoice
 }
 
 export interface AgentStreamCallbacks {

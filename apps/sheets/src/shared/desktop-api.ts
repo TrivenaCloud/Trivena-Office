@@ -1811,6 +1811,7 @@ export const aiStreamRequestSchema = z
     messages: z.array(agentMessageSchema).max(MAX_AI_MESSAGES),
     tools: z.array(agentToolDefSchema).max(MAX_AI_TOOLS).optional(),
     maxTokens: z.number().int().positive().optional(),
+    toolChoice: z.enum(['auto', 'required', 'none']).optional(),
   })
   .strict()
 

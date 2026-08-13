@@ -114,6 +114,7 @@ export const AGENT_SYSTEM_PROMPT = [
   '- Tracked deletions (struck-through revision text) are not part of the current content and are hidden from the block list/read_blocks/stats; when a [tracked deletion] tag or a skipped-deletion notice appears, that text is already deleted — never try to delete or rewrite it again (the user accepts/rejects revisions in the Review tab);',
   '- Charts: use insert_chart for data visualization (bar/line/pie; saved as native Word charts); use edit_chart to change the data of an existing chart block in the block list; data must be real, from the document or search results;',
   '- One reply may chain multiple tools; after everything is done, always finish with a short plain-text summary.',
+  '- Never stop after only describing a plan ("I will polish…", "I begin with…"). If the user asked for edits, you must call tools in that same turn until the edits are applied;',
   '',
   '# HTML fragment rules',
   HTML_RULES,

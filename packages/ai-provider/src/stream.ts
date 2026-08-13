@@ -699,10 +699,11 @@ export async function streamOpenAiCompatible(
   tools: AgentToolDef[],
   maxTokens: number,
   cb: StreamCallbacks,
+  toolChoice?: 'auto' | 'required' | 'none',
 ): Promise<void> {
   const wd = createStreamWatchdog(cb.signal)
   return wd.guard(() =>
-    openAiCompatibleTurn(baseUrl, config, system, messages, tools, maxTokens, cb, wd),
+    openAiCompatibleTurn(baseUrl, config, system, messages, tools, maxTokens, cb, wd, toolChoice),
   )
 }
 
@@ -715,6 +716,7 @@ async function openAiCompatibleTurn(
   maxTokens: number,
   cb: StreamCallbacks,
   wd: StreamWatchdog,
+  toolChoice?: 'auto' | 'required' | 'none',
 ): Promise<void> {
   const onBytes = () => {
     wd.touch()
@@ -738,6 +740,8 @@ async function openAiCompatibleTurn(
               type: 'function',
               function: { name: t.name, description: t.description, parameters: t.inputSchema },
             })),
+            // Gemini's OpenAI-compat path often returns plain text with tool_choice=auto.
+            tool_choice: toolChoice ?? 'auto',
           }
         : {}),
       temperature: 0.3,
@@ -852,6 +856,7 @@ export async function streamForProvider(
   tools: AgentToolDef[],
   maxTokens: number,
   cb: StreamCallbacks,
+  toolChoice?: 'auto' | 'required' | 'none',
 ): Promise<void> {
   switch (provider) {
     case 'genspark':
@@ -864,6 +869,7 @@ export async function streamForProvider(
         tools,
         maxTokens,
         cb,
+        toolChoice,
       )
     case 'anthropic':
       return streamAnthropic(config, system, messages, tools, maxTokens, cb)
@@ -879,10 +885,20 @@ export async function streamForProvider(
         tools,
         maxTokens,
         cb,
+        toolChoice,
       )
     case 'custom':
       if (!config.baseUrl) throw new Error('A custom provider requires a Base URL')
-      return streamOpenAiCompatible(config.baseUrl, config, system, messages, tools, maxTokens, cb)
+      return streamOpenAiCompatible(
+        config.baseUrl,
+        config,
+        system,
+        messages,
+        tools,
+        maxTokens,
+        cb,
+        toolChoice,
+      )
     default:
       throw new Error(`Unknown provider: ${provider}`)
   }

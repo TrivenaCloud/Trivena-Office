@@ -362,6 +362,19 @@ if (updateUrl) {
       channel: 'latest',
     },
   ]
+} else {
+  // Default: GitHub Releases feed so packaged builds can auto-update without a
+  // private CDN. Publish artifacts with `electron-builder --publish always`
+  // (see .github/workflows/release.yml) so latest.yml / latest-mac.yml land on
+  // the release matching this version.
+  config.publish = [
+    {
+      provider: 'github',
+      owner: 'TrivenaCloud',
+      repo: 'Trivena-Office',
+      releaseType: 'release',
+    },
+  ]
 }
 
 module.exports = config

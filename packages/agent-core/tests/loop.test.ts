@@ -190,6 +190,51 @@ describe('AgentLoop', () => {
     expect(onToolExecuted.mock.calls[1][0].snapshotBefore).toBeUndefined()
   })
 
+  it('nudges when the model plans in text after tools without mutating', async () => {
+    const transport = scriptedTransport([
+      (cb) => {
+        cb.onToolCall({ id: 't1', name: 'do_thing', input: {} })
+        cb.onDone()
+      },
+      (cb) => {
+        cb.onDelta('Ik zal het document nu polijsten…')
+        cb.onDone()
+      },
+      (cb) => {
+        cb.onToolCall({ id: 't2', name: 'do_thing', input: { a: 2 } })
+        cb.onDone()
+      },
+      (cb) => {
+        cb.onDelta('Klaar.')
+        cb.onDone()
+      },
+    ])
+    let call = 0
+    const skill = makeSkill(() => {
+      call++
+      // First tool is a read (no mutation); second mutates so the run can finish.
+      return call === 1
+        ? { output: 'doc text', summary: 'read' }
+        : { output: 'edited', summary: 'edit', mutated: true }
+    })
+    const onDone = vi.fn()
+    const loop = new AgentLoop({ transport, skill, events: { onDone } })
+    loop.run('polijst het document')
+    await flush()
+    await flush()
+    await flush()
+    await flush()
+    await flush()
+    expect(transport.requests.length).toBeGreaterThanOrEqual(3)
+    const nudge = loop.messages.find(
+      (m) => m.role === 'user' && m.text.includes('Do not only describe the plan'),
+    )
+    expect(nudge).toBeDefined()
+    expect(onDone).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Klaar.', cancelled: false }),
+    )
+  })
+
   it('after maxTurns, adds a final tool-less turn that yields a partial answer', async () => {
     const alwaysTool = (cb: AgentStreamCallbacks) => {
       cb.onToolCall({ id: 'x', name: 'do_thing', input: {} })
