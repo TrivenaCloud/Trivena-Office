@@ -41,7 +41,7 @@ jobs:
       - name: Package + publish Linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run notices && npm run build:all && npm run dist:linux -w @trivoffice/shell -- --publish always
+        run: npm run notices && npm run build:all && npm run dist:linux:publish -w @trivoffice/shell
 
   windows:
     runs-on: windows-latest
@@ -73,7 +73,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npm run dist:win -w @trivoffice/shell -- --publish always
+        run: npm run dist:win:publish -w @trivoffice/shell
 
   macos:
     runs-on: macos-14
@@ -88,6 +88,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
         with:
           toolchain: stable
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
       - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
         with:
           workspaces: apps/sheets/native/xlsx-engine
@@ -96,4 +97,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npm run notices && npm run build:all && npm run native:build:universal -w @trivoffice/sheets && npm run dist:mac -w @trivoffice/shell -- --publish always
+        # Match root dist:mac (universal sidecar + arm64 package). Publish script
+        # uses --publish always so GitHub Releases get latest-mac.yml.
+        run: npm run notices && npm run build:all && npm run native:build:universal -w @trivoffice/sheets && npm run dist:mac:publish -w @trivoffice/shell

@@ -12,15 +12,15 @@ Je mag dit document invullen en terugsturen als Word/PDF, of de antwoorden gewoo
 
 ## 1. Over jou
 
-| Vraag | Antwoord |
-| --- | --- |
-| Naam (of initialen) | |
-| Rol / functie | |
-| Organisatie / sector (optioneel) | |
-| Land / taal waarin je werkt | |
-| Welke apps gebruik je vooral? | ☐ Docs &nbsp; ☐ Sheets &nbsp; ☐ Slides &nbsp; ☐ PDF &nbsp; ☐ Markdown |
-| Hoe vaak zou je TrivOffice gebruiken? | ☐ Dagelijks &nbsp; ☐ Wekelijks &nbsp; ☐ Af en toe |
-| Wat gebruik je nu? | ☐ Word/Excel/PowerPoint &nbsp; ☐ Google Workspace &nbsp; ☐ Andere: ___ |
+| Vraag                                 | Antwoord                                                               |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| Naam (of initialen)                   |                                                                        |
+| Rol / functie                         |                                                                        |
+| Organisatie / sector (optioneel)      |                                                                        |
+| Land / taal waarin je werkt           |                                                                        |
+| Welke apps gebruik je vooral?         | ☐ Docs &nbsp; ☐ Sheets &nbsp; ☐ Slides &nbsp; ☐ PDF &nbsp; ☐ Markdown  |
+| Hoe vaak zou je TrivOffice gebruiken? | ☐ Dagelijks &nbsp; ☐ Wekelijks &nbsp; ☐ Af en toe                      |
+| Wat gebruik je nu?                    | ☐ Word/Excel/PowerPoint &nbsp; ☐ Google Workspace &nbsp; ☐ Andere: ___ |
 
 ---
 
@@ -28,7 +28,7 @@ Je mag dit document invullen en terugsturen als Word/PDF, of de antwoorden gewoo
 
 Kopieer dit blok zo vaak als nodig.
 
-### Use case #
+### Use case
 
 **Titel** (kort, bv. “Wekelijks projectverslag schrijven”)
 
@@ -47,7 +47,7 @@ Wat moet er klaar zijn aan het eind? (document, mail, presentatie, cijfers…)
 **Stappen die je nu zet**  
 1.  
 2.  
-3.  
+3.
 
 **Welke bestanden / bronnen gebruik je?**  
 (bv. vorige week-rapport, Excel met uren, e-mails, PDF van klant)
@@ -85,45 +85,46 @@ Wat moet er klaar zijn aan het eind? (document, mail, presentatie, cijfers…)
 
 ### Voorbeeld (ingevuld)
 
-**Titel:** Wekelijks projectverslag voor management  
+**Titel:** Wekelijks projectverslag voor management
 
-**Situatie:** Elke vrijdag moet ik een kort statusrapport sturen naar mijn lead.  
+**Situatie:** Elke vrijdag moet ik een kort statusrapport sturen naar mijn lead.
 
-**Doel:** 1–2 pagina’s Word-document: voortgang, blockers, volgende week.  
+**Doel:** 1–2 pagina’s Word-document: voortgang, blockers, volgende week.
 
-**Stappen nu:**  
-1. Notities uit meetings verzamelen  
-2. In Word plakken en herschrijven  
-3. Opmaak fixen en mailen  
+**Stappen nu:**
 
-**Bronnen:** Meeting notes, Jira/tickets, vorige week-rapport  
+1. Notities uit meetings verzamelen
+2. In Word plakken en herschrijven
+3. Opmaak fixen en mailen
 
-**Frustratie:** Te veel tijd aan formuleren en opmaak; inhoud is al bekend.  
+**Bronnen:** Meeting notes, Jira/tickets, vorige week-rapport
 
-**AI-hulp:** Schrijven + samenvatten + opmaak  
+**Frustratie:** Te veel tijd aan formuleren en opmaak; inhoud is al bekend.
 
-**Gewenst resultaat:** “Als dit goed werkt, heb ik in 10 minuten een nette weekrapport-concept.”  
+**AI-hulp:** Schrijven + samenvatten + opmaak
 
-**Frequentie:** Wekelijks · **Belang:** 5  
+**Gewenst resultaat:** “Als dit goed werkt, heb ik in 10 minuten een nette weekrapport-concept.”
+
+**Frequentie:** Wekelijks · **Belang:** 5
 
 ---
 
 ## 3. AI in TrivOffice
 
-| Vraag | Antwoord |
-| --- | --- |
-| Heb je al met de AI-chat gewerkt? | ☐ Ja &nbsp; ☐ Nee &nbsp; ☐ Gedeeltelijk |
-| Wat ging goed? | |
-| Wat ging mis of voelde onbetrouwbaar? | |
-| Welke taal gebruik je met AI? | |
-| Mag AI het document zelf aanpassen? | ☐ Ja, graag &nbsp; ☐ Alleen voorstellen &nbsp; ☐ Liever niet |
-| Wat is een “goede” AI-actie voor jou? | (kort voorbeeld) |
+| Vraag                                 | Antwoord                                                     |
+| ------------------------------------- | ------------------------------------------------------------ |
+| Heb je al met de AI-chat gewerkt?     | ☐ Ja &nbsp; ☐ Nee &nbsp; ☐ Gedeeltelijk                      |
+| Wat ging goed?                        |                                                              |
+| Wat ging mis of voelde onbetrouwbaar? |                                                              |
+| Welke taal gebruik je met AI?         |                                                              |
+| Mag AI het document zelf aanpassen?   | ☐ Ja, graag &nbsp; ☐ Alleen voorstellen &nbsp; ☐ Liever niet |
+| Wat is een “goede” AI-actie voor jou? | (kort voorbeeld)                                             |
 
 **Schrijf 3 prompts die je echt zou typen** (zoals je ze aan AI zou geven):
 
-1.  
-2.  
-3.  
+1.
+2.
+3.
 
 ---
 
@@ -131,28 +132,28 @@ Wat moet er klaar zijn aan het eind? (document, mail, presentatie, cijfers…)
 
 Kruis aan wat het belangrijkst is (max. 5):
 
-- ☐ Openen/opslaan van echte `.docx` / `.xlsx` / `.pptx` zonder kapotte layout  
-- ☐ Snelheid / stabiliteit  
-- ☐ AI die documenten écht verbetert (niet alleen chat)  
-- ☐ Samenwerken / delen (later)  
-- ☐ Templates voor mijn sector  
-- ☐ Offline werken  
-- ☐ Privacy / data niet delen met derden  
-- ☐ Integraties (Drive, e-mail, Slack, CRM, …) — welke: ___  
-- ☐ Betere Nederlandse (of jouw taal) ervaring  
-- ☐ Iets anders: ___  
+- ☐ Openen/opslaan van echte `.docx` / `.xlsx` / `.pptx` zonder kapotte layout
+- ☐ Snelheid / stabiliteit
+- ☐ AI die documenten écht verbetert (niet alleen chat)
+- ☐ Samenwerken / delen (later)
+- ☐ Templates voor mijn sector
+- ☐ Offline werken
+- ☐ Privacy / data niet delen met derden
+- ☐ Integraties (Drive, e-mail, Slack, CRM, …) — welke: ___
+- ☐ Betere Nederlandse (of jouw taal) ervaring
+- ☐ Iets anders: ___
 
 **Top 3 problemen die je nu ziet (bugs of gemis):**
 
-1.  
-2.  
-3.  
+1.
+2.
+3.
 
 **Top 3 dingen die wél goed voelen:**
 
-1.  
-2.  
-3.  
+1.
+2.
+3.
 
 ---
 
@@ -160,20 +161,20 @@ Kruis aan wat het belangrijkst is (max. 5):
 
 Kruis aan wat je herkent en vul kort in:
 
-| Scenario | Herkenbaar? | Jouw variant (1 zin) |
-| --- | --- | --- |
-| Offerte / voorstel schrijven | ☐ | |
-| Notulen of actiepunten uitwerken | ☐ | |
-| Rapport / memo voor management | ☐ | |
-| CV / sollicitatiebrief | ☐ | |
-| Vertalen of toon aanpassen (formeel/informeel) | ☐ | |
-| Lange PDF samenvatten | ☐ | |
-| Spreadsheet: totalen, filters, uitleg bij cijfers | ☐ | |
-| Presentatie uit een document maken | ☐ | |
-| Contract / voorwaarden nalezen | ☐ | |
-| Lesmateriaal / training slides | ☐ | |
-| Marketingtekst / social / nieuwsbrief | ☐ | |
-| Andere: ___ | ☐ | |
+| Scenario                                          | Herkenbaar? | Jouw variant (1 zin) |
+| ------------------------------------------------- | ----------- | -------------------- |
+| Offerte / voorstel schrijven                      | ☐           |                      |
+| Notulen of actiepunten uitwerken                  | ☐           |                      |
+| Rapport / memo voor management                    | ☐           |                      |
+| CV / sollicitatiebrief                            | ☐           |                      |
+| Vertalen of toon aanpassen (formeel/informeel)    | ☐           |                      |
+| Lange PDF samenvatten                             | ☐           |                      |
+| Spreadsheet: totalen, filters, uitleg bij cijfers | ☐           |                      |
+| Presentatie uit een document maken                | ☐           |                      |
+| Contract / voorwaarden nalezen                    | ☐           |                      |
+| Lesmateriaal / training slides                    | ☐           |                      |
+| Marketingtekst / social / nieuwsbrief             | ☐           |                      |
+| Andere: ___                                       | ☐           |                      |
 
 ---
 
@@ -181,25 +182,25 @@ Kruis aan wat je herkent en vul kort in:
 
 Rond af met concrete meetlatten, bijvoorbeeld:
 
-- “Ik kan mijn wekelijkse rapport in &lt; ___ minuten maken.”  
-- “AI mag het document aanpassen als ik daarna nog max. ___ minuten hoef te corrigeren.”  
+- “Ik kan mijn wekelijkse rapport in &lt; ___ minuten maken.”
+- “AI mag het document aanpassen als ik daarna nog max. ___ minuten hoef te corrigeren.”
 - “Bestanden moeten openen in Microsoft Office zonder kapotte opmaak: ☐ verplicht ☐ nice to have”
 
 Jouw criteria:
 
-1.  
-2.  
-3.  
+1.
+2.
+3.
 
 ---
 
 ## 7. Privacy & toestemming
 
-- ☐ Je mag mijn antwoorden gebruiken om TrivOffice te verbeteren  
-- ☐ Je mag (geanonimiseerde) citaten gebruiken in interne docs  
+- ☐ Je mag mijn antwoorden gebruiken om TrivOffice te verbeteren
+- ☐ Je mag (geanonimiseerde) citaten gebruiken in interne docs
 - ☐ Ik wil later meedoen aan een korte demo / interview (± 30 min)
 
-Contact (e-mail of telefoon, optioneel):  
+Contact (e-mail of telefoon, optioneel):
 
 >
 
@@ -209,11 +210,11 @@ Contact (e-mail of telefoon, optioneel):
 
 **Zo stuur je dit document:**
 
-1. Stuur deze template naar 5–20 typische gebruikers (verschillende rollen).  
-2. Vraag om **minstens 1 ingevulde use case** + sectie 3 (AI).  
+1. Stuur deze template naar 5–20 typische gebruikers (verschillende rollen).
+2. Vraag om **minstens 1 ingevulde use case** + sectie 3 (AI).
 3. Verzamel antwoorden in één spreadsheet met kolommen:  
-   `rol | use case titel | app | frequentie | belang | AI-wens | pijn | quote`  
-4. Prioriteer op: **belang × frequentie**, niet op “leukste idee”.  
+   `rol | use case titel | app | frequentie | belang | AI-wens | pijn | quote`
+4. Prioriteer op: **belang × frequentie**, niet op “leukste idee”.
 5. Zet de top 5 om in tickets: probleem → gewenst resultaat → acceptatiecriteria.
 
 **Goede follow-upvraag na ontvangst:**  
@@ -221,4 +222,4 @@ Contact (e-mail of telefoon, optioneel):
 
 ---
 
-*TrivOffice · Trivena Cloud · Bedankt voor je tijd.*
+_TrivOffice · Trivena Cloud · Bedankt voor je tijd._
