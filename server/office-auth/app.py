@@ -433,6 +433,22 @@ async def llm_openai(path: str, request: Request, authorization: str | None = He
             status_code=503,
         )
     body = await request.body()
+    # Free-tier OpenRouter balances reject high max_tokens (HTTP 402). Clamp so
+    # desktop clients keep working even when they still send 8192.
+    max_tokens_cap = int(os.environ.get("OPENROUTER_MAX_TOKENS", "2048"))
+    if request.method.upper() == "POST" and body:
+        try:
+            payload = json.loads(body)
+            if isinstance(payload, dict):
+                requested = payload.get("max_tokens")
+                if isinstance(requested, (int, float)) and requested > max_tokens_cap:
+                    payload["max_tokens"] = max_tokens_cap
+                    body = json.dumps(payload).encode("utf-8")
+                elif requested is None and max_tokens_cap > 0:
+                    payload["max_tokens"] = max_tokens_cap
+                    body = json.dumps(payload).encode("utf-8")
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
     headers = {
         "authorization": f"Bearer {api_key}",
         "content-type": request.headers.get("content-type", "application/json"),

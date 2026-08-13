@@ -2177,7 +2177,8 @@ export function registerSheetsAiIpc(): void {
     const request = aiStreamRequestSchema.parse(input)
     const { requestId, system, messages } = request
     const tools = request.tools ?? []
-    const maxTokens = request.maxTokens ?? 8192
+    // Keep default below typical OpenRouter free-tier affordability to avoid HTTP 402.
+    const maxTokens = request.maxTokens ?? 2048
     const provider = request.settings.provider as AiProviderId
     let config = request.settings.providers[provider]
     // Trivena Cloud's key never enters the settings file; it is read from the gsk

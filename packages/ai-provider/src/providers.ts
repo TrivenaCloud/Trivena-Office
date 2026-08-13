@@ -32,17 +32,18 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
     // OpenRouter model IDs (routed via cloud.trivena.tech → OpenRouter).
     // Picked for office agents: long context, tool use, editing quality.
     models: [
-      'anthropic/claude-sonnet-4.6',
-      'anthropic/claude-opus-4.8',
-      'anthropic/claude-opus-4.7',
-      'openai/gpt-5',
-      'openai/gpt-4.1',
-      'google/gemini-2.5-pro',
       'google/gemini-2.5-flash',
       'deepseek/deepseek-chat-v3.1',
+      'anthropic/claude-sonnet-4.6',
+      'google/gemini-2.5-pro',
+      'openai/gpt-4.1',
+      'openai/gpt-5',
+      'anthropic/claude-opus-4.8',
+      'anthropic/claude-opus-4.7',
       'deepseek/deepseek-r1-0528',
     ],
-    defaultModel: 'anthropic/claude-sonnet-4.6',
+    // Cheaper default so shared OpenRouter free-tier credits last longer.
+    defaultModel: 'google/gemini-2.5-flash',
     keyPlaceholder: 'Not required — sign in to Trivena Cloud',
   },
   {

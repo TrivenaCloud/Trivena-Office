@@ -24,7 +24,7 @@ async function chatAnthropic(
     },
     body: JSON.stringify({
       model: config.model,
-      max_tokens: 8192,
+      max_tokens: 2048,
       system,
       messages: [{ role: 'user', content: user }],
     }),

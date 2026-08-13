@@ -2514,7 +2514,8 @@ export function registerAiIpc(): void {
   ipcMain.handle('ai:stream', async (event, request: AiStreamRequest) => {
     const { requestId, settings, system, messages } = request
     const tools = request.tools ?? []
-    const maxTokens = request.maxTokens ?? 8192
+    // Keep default below typical OpenRouter free-tier affordability to avoid HTTP 402.
+    const maxTokens = request.maxTokens ?? 2048
     const provider = settings.provider
     let config = settings.providers?.[provider]
     // the genspark key never enters the settings file; requests take it from the gsk login state
