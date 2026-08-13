@@ -468,37 +468,78 @@ def _normalize_gemini_model(model: str | None) -> str:
     return m
 
 
+def _normalize_nvidia_model(model: str | None) -> str:
+    """Force NVIDIA NIM model ids; map legacy Gemini / OpenRouter names to the default."""
+    default = os.environ.get("NVIDIA_DEFAULT_MODEL", "z-ai/glm-5.2")
+    if not model:
+        return default
+    m = model.strip()
+    if m.startswith("gemini") or m.startswith("google/") or m.startswith("openrouter/"):
+        return default
+    # Allow other NVIDIA catalog ids (e.g. meta/llama-…); keep GLM as the safe default.
+    if "/" not in m:
+        return default
+    return m
+
+
+def _openai_compat_backend() -> tuple[str, str, str]:
+    """Return (backend, api_key, base_url) for the OpenAI-compatible LLM proxy.
+
+    Priority: NVIDIA NIM → Gemini → OpenRouter.
+    """
+    nvidia_key = os.environ.get("NVIDIA_API_KEY", "") or os.environ.get("NGC_API_KEY", "")
+    if nvidia_key:
+        base = os.environ.get("NVIDIA_OPENAI_BASE_URL", "https://integrate.api.nvidia.com/v1").rstrip(
+            "/"
+        )
+        return "nvidia", nvidia_key, base
+    gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
+    if gemini_key:
+        base = os.environ.get(
+            "GEMINI_OPENAI_BASE_URL",
+            "https://generativelanguage.googleapis.com/v1beta/openai",
+        ).rstrip("/")
+        return "gemini", gemini_key, base
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
+    if openrouter_key:
+        base = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
+        return "openrouter", openrouter_key, base
+    return "", "", ""
+
+
 @app.api_route("/api/llm/openai/v1/{path:path}", methods=["GET", "POST"])
 async def llm_openai(path: str, request: Request, authorization: str | None = Header(default=None)):
     """Proxy OpenAI-compatible traffic.
 
-    Prefer Google Gemini (free AI Studio key) when GEMINI_API_KEY is set;
-    otherwise fall back to OpenRouter.
+    Prefer NVIDIA NIM (GLM) when NVIDIA_API_KEY is set; else Gemini; else OpenRouter.
     """
     email = _require_office_key(authorization)
-    gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
-    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
-    use_gemini = bool(gemini_key)
-    api_key = gemini_key if use_gemini else openrouter_key
+    backend, api_key, base = _openai_compat_backend()
     if not api_key:
         return JSONResponse(
             {
                 "error": {
-                    "message": "No LLM key configured on Trivena Cloud (set GEMINI_API_KEY or OPENROUTER_API_KEY).",
+                    "message": (
+                        "No LLM key configured on Trivena Cloud "
+                        "(set NVIDIA_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)."
+                    ),
                     "type": "server_error",
                 }
             },
             status_code=503,
         )
     body = await request.body()
-    # Gemini free tier tolerates larger completions; OpenRouter free tier often does not.
-    default_cap = "8192" if use_gemini else "2048"
+    default_cap = "8192" if backend in ("nvidia", "gemini") else "2048"
     max_tokens_cap = int(os.environ.get("LLM_MAX_TOKENS", os.environ.get("OPENROUTER_MAX_TOKENS", default_cap)))
     if request.method.upper() == "POST" and body:
         try:
             payload = json.loads(body)
             if isinstance(payload, dict):
-                if use_gemini:
+                if backend == "nvidia":
+                    payload["model"] = _normalize_nvidia_model(
+                        payload.get("model") if isinstance(payload.get("model"), str) else None
+                    )
+                elif backend == "gemini":
                     payload["model"] = _normalize_gemini_model(
                         payload.get("model") if isinstance(payload.get("model"), str) else None
                     )
@@ -515,15 +556,9 @@ async def llm_openai(path: str, request: Request, authorization: str | None = He
         "content-type": request.headers.get("content-type", "application/json"),
         "X-Trivena-User": email,
     }
-    if use_gemini:
-        base = os.environ.get(
-            "GEMINI_OPENAI_BASE_URL",
-            "https://generativelanguage.googleapis.com/v1beta/openai",
-        ).rstrip("/")
-    else:
+    if backend == "openrouter":
         headers["HTTP-Referer"] = os.environ.get("PUBLIC_BASE_URL", "https://cloud.trivena.tech")
         headers["X-Title"] = "TrivOffice"
-        base = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
     url = f"{base}/{path}"
     client = httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=30.0))
     req = client.build_request(request.method, url, content=body, headers=headers)

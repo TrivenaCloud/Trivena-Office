@@ -62,4 +62,18 @@ describe('resolveAiSettings', () => {
     // provider not mentioned in stored.providers keeps the computed default
     expect(resolved.providers.anthropic.apiKey).toBe('preset-key')
   })
+
+  it('migrates Trivena Cloud Gemini model ids onto the NVIDIA default', () => {
+    const defaults = defaultAiSettings()
+    const resolved = resolveAiSettings(
+      {
+        provider: 'genspark',
+        providers: {
+          genspark: { apiKey: '', model: 'gemini-2.5-flash' },
+        } as never,
+      },
+      defaults,
+    )
+    expect(resolved.providers.genspark.model).toBe('z-ai/glm-5.2')
+  })
 })

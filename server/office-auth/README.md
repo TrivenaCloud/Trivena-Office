@@ -62,7 +62,10 @@ and the **Press User** role (`User … is not part of any team`).
 
 - `FRAPPE_BASE_URL` — default `https://cloud.trivena.tech`
 - `PUBLIC_BASE_URL` — auth URLs shown to the desktop
-- `GEMINI_API_KEY` — primary LLM gateway (Google AI Studio; OpenAI-compatible proxy)
+- `NVIDIA_API_KEY` — primary LLM gateway (NVIDIA NIM; OpenAI-compatible)
+- `NVIDIA_DEFAULT_MODEL` — default `z-ai/glm-5.2`
+- `NVIDIA_OPENAI_BASE_URL` — default `https://integrate.api.nvidia.com/v1`
+- `GEMINI_API_KEY` — fallback if NVIDIA is unset
 - `GEMINI_DEFAULT_MODEL` — default `gemini-2.5-flash`
-- `OPENROUTER_API_KEY` — fallback if Gemini is unset
+- `OPENROUTER_API_KEY` — fallback if NVIDIA and Gemini are unset
 - `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` — optional direct vendor proxies

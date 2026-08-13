@@ -610,9 +610,14 @@ export class AgentLoop<TSnapshot = unknown> {
       // don't execute; feed a targeted error back so the model retries correctly
       if (call.truncated || call.inputError) {
         this.inputParseFails++
+        const looksConcatenated =
+          /set_element_\w+set_element_|generate_deck\w+|execute_slide_script\w+/.test(call.name) ||
+          (call.name.match(/_/g) ?? []).length > 6
         const output = call.truncated
-          ? 'Tool arguments were cut off by the output length limit; the tool was not executed. Split this operation into several smaller tool calls (less content per call) and try again.'
-          : `Tool input JSON failed to parse; the tool was not executed: ${call.inputError}\nFix the arguments (make sure quotes inside strings are escaped) and call again.`
+          ? 'Tool arguments were cut off by the output length limit; the tool was not executed. Prefer ONE execute_slide_script (or one small tool call) instead of many set_element_* calls; try again with less content.'
+          : looksConcatenated
+            ? `Tool name "${call.name}" looks invalid (names concatenated or corrupted). Call exactly one valid tool — for slide polish use execute_slide_script once; do not combine set_element_style with set_element_transform in one call.`
+            : `Tool input JSON failed to parse; the tool was not executed: ${call.inputError}\nFix the arguments (make sure quotes inside strings are escaped) and call again. Prefer one smaller tool call.`
         results.push({ id: call.id, name: call.name, output, isError: true })
         events?.onToolExecuted?.({
           call,

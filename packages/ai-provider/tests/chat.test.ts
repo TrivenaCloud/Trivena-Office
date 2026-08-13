@@ -106,7 +106,7 @@ describe('chatForProvider', () => {
       .fn()
       .mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     vi.stubGlobal('fetch', fetchMock)
-    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gemini-2.5-flash' }, 'sys', 'hi')
+    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'z-ai/glm-5.2' }, 'sys', 'hi')
     expect(fetchMock).toHaveBeenCalledWith(
       'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
       expect.objectContaining({
@@ -125,7 +125,7 @@ describe('chatForProvider', () => {
       .fn()
       .mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     vi.stubGlobal('fetch', fetchMock)
-    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gemini-2.5-flash' }, 'sys', 'hi')
+    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'z-ai/glm-5.2' }, 'sys', 'hi')
     expect((fetchMock.mock.calls[0]![1].headers as Record<string, string>)['X-Agent-Type']).toBe(
       'trivoffice',
     )

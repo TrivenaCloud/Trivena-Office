@@ -681,7 +681,7 @@ describe('streamForProvider: openai-compatible', () => {
 
 describe('streamForProvider: genspark', () => {
   it('routes all Trivena Cloud models through the OpenAI-compatible OpenRouter proxy', async () => {
-    for (const model of ['gemini-2.5-flash', 'google/gemini-2.5-pro', 'gemini-2.0-flash']) {
+    for (const model of ['z-ai/glm-5.2', 'gemini-2.5-flash', 'google/gemini-2.5-pro']) {
       const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream(['data: [DONE]'])))
       vi.stubGlobal('fetch', fetchMock)
       const { cb } = collector()

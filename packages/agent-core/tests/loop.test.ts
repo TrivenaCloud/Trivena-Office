@@ -864,7 +864,7 @@ describe('AgentLoop compaction', () => {
     expect(executed).toHaveLength(0)
     const toolMsg = loop.messages[2] as Extract<AgentMessage, { role: 'tool' }>
     expect(toolMsg.results[0].isError).toBe(true)
-    expect(toolMsg.results[0].output).toContain('smaller tool calls')
+    expect(toolMsg.results[0].output).toContain('execute_slide_script')
     expect(toolMsg.results[0].output).not.toContain('JSON failed to parse')
     // the follow-up turn completed normally, and a non-final max_tokens does not mark the result truncated
     expect(onDone).toHaveBeenCalledWith({ text: 'done', cancelled: false, turnLimit: false })

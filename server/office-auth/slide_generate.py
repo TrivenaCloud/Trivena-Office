@@ -1,4 +1,9 @@
-"""Brief → one-slide PPTX for TrivOffice (replaces Genspark tool_cli /slide_generate)."""
+"""Brief → one-slide PPTX for TrivOffice (replaces Genspark tool_cli /slide_generate).
+
+Produces several modern layouts (cover, cards, split image, two-column, big number)
+from an LLM JSON plan (NVIDIA GLM / Gemini) + python-pptx. Not Genspark HTML quality, but far above a
+single accent-bar + bullet list.
+"""
 
 from __future__ import annotations
 
@@ -17,6 +22,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 _HEX = re.compile(r"#([0-9a-fA-F]{6})")
+LAYOUTS = ("cover", "title_cards", "split_image", "two_column", "big_number", "bullets")
 
 
 def _rgb(hex_color: str, default: str = "1A1A2E") -> RGBColor:
@@ -26,93 +32,195 @@ def _rgb(hex_color: str, default: str = "1A1A2E") -> RGBColor:
 
 
 def _pick_colors(style_skill: str) -> dict[str, str]:
-    found = _HEX.findall(style_skill or "")
-    # Prefer later explicit "Main background" / "Primary accent" style lines when present
-    bg, text, accent = "FFFFFF", "1A1A2E", "2563EB"
+    bg, text, accent, card, muted = "F8FAFC", "0F172A", "2563EB", "FFFFFF", "64748B"
     skill = style_skill or ""
     for label, key in (
         ("Main background", "bg"),
         ("Main text", "text"),
         ("Primary accent", "accent"),
+        ("Card background", "card"),
+        ("Secondary accent", "muted"),
     ):
         m = re.search(rf"{label}[^#\n]*?(#[0-9a-fA-F]{{6}})", skill, re.I)
-        if m:
-            if key == "bg":
-                bg = m.group(1)
-            elif key == "text":
-                text = m.group(1)
-            else:
-                accent = m.group(1)
-    if found and bg == "FFFFFF":
-        # Fall back to first hexes in the skill if labels missing
+        if not m:
+            continue
+        val = m.group(1)
+        if key == "bg":
+            bg = val
+        elif key == "text":
+            text = val
+        elif key == "accent":
+            accent = val
+        elif key == "card":
+            card = val
+        else:
+            muted = val
+    found = _HEX.findall(skill)
+    if found and bg == "F8FAFC":
         if len(found) >= 1:
             bg = "#" + found[0]
         if len(found) >= 2:
             text = "#" + found[1]
         if len(found) >= 3:
             accent = "#" + found[2]
-    return {"bg": bg if bg.startswith("#") else f"#{bg}", "text": text if text.startswith("#") else f"#{text}", "accent": accent if accent.startswith("#") else f"#{accent}"}
+    return {
+        "bg": bg if bg.startswith("#") else f"#{bg}",
+        "text": text if text.startswith("#") else f"#{text}",
+        "accent": accent if accent.startswith("#") else f"#{accent}",
+        "card": card if card.startswith("#") else f"#{card}",
+        "muted": muted if muted.startswith("#") else f"#{muted}",
+    }
 
 
-async def _gemini_structure(
+def _set_fill(shape: Any, hex_color: str) -> None:
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = _rgb(hex_color)
+    shape.line.fill.background()
+
+
+def _round_rect(slide: Any, left: Any, top: Any, width: Any, height: Any, fill: str, radius: float = 0.15) -> Any:
+    shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
+    _set_fill(shape, fill)
+    # Softer corners
+    try:
+        shape.adjustments[0] = radius
+    except Exception:
+        pass
+    return shape
+
+
+def _textbox(
+    slide: Any,
+    left: Any,
+    top: Any,
+    width: Any,
+    height: Any,
+    text: str,
+    *,
+    size: int,
+    color: str,
+    bold: bool = False,
+    align: Any = PP_ALIGN.LEFT,
+) -> Any:
+    box = slide.shapes.add_textbox(left, top, width, height)
+    tf = box.text_frame
+    tf.word_wrap = True
+    try:
+        tf.auto_size = None
+    except Exception:
+        pass
+    p = tf.paragraphs[0]
+    p.text = text
+    p.font.size = Pt(size)
+    p.font.bold = bold
+    p.font.color.rgb = _rgb(color)
+    p.alignment = align
+    return box
+
+
+def _add_bullets(tf: Any, bullets: list[str], *, size: int, color: str) -> None:
+    for i, bullet in enumerate(bullets):
+        para = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        para.text = bullet
+        para.level = 0
+        para.font.size = Pt(size)
+        para.font.color.rgb = _rgb(color)
+        para.space_after = Pt(8)
+
+
+def _llm_openai_endpoint() -> tuple[str, str, str]:
+    """(api_key, base_url, model) for slide planning. Prefer NVIDIA NIM."""
+    nvidia_key = os.environ.get("NVIDIA_API_KEY", "") or os.environ.get("NGC_API_KEY", "")
+    if nvidia_key:
+        base = os.environ.get("NVIDIA_OPENAI_BASE_URL", "https://integrate.api.nvidia.com/v1").rstrip(
+            "/"
+        )
+        model = os.environ.get("NVIDIA_DEFAULT_MODEL", "z-ai/glm-5.2")
+        return nvidia_key, base, model
+    gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
+    if gemini_key:
+        base = os.environ.get(
+            "GEMINI_OPENAI_BASE_URL",
+            "https://generativelanguage.googleapis.com/v1beta/openai",
+        ).rstrip("/")
+        model = os.environ.get("GEMINI_DEFAULT_MODEL", "gemini-2.5-flash")
+        return gemini_key, base, model
+    return "", "", ""
+
+
+async def _llm_structure(
     *,
     brief: str,
     title: str,
     style_skill: str,
     deck_context: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    api_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
-    model = os.environ.get("GEMINI_DEFAULT_MODEL", "gemini-2.5-flash")
+    api_key, base, model = _llm_openai_endpoint()
     if not api_key:
-        # Offline-ish fallback: crude split of the brief
         lines = [ln.strip(" -•\t") for ln in brief.splitlines() if ln.strip()]
         return {
             "title": title or (lines[0][:80] if lines else "Slide"),
-            "bullets": lines[1:7] if len(lines) > 1 else lines[:5],
             "subtitle": "",
+            "layout": "title_cards",
+            "cards": [
+                {"title": "Point", "body": b} for b in (lines[1:4] if len(lines) > 1 else lines[:3])
+            ],
+            "bullets": lines[1:6],
         }
 
     ctx = json.dumps(deck_context or {}, ensure_ascii=False)[:1500]
     prompt = (
-        "You design one presentation slide. Reply with ONLY valid JSON (no markdown):\n"
-        '{"title":"...","subtitle":"...","bullets":["...","..."],"notes":"..."}\n'
-        "Rules: 3-6 short bullets; concrete facts from the brief; no invented numbers; "
-        "title max 60 chars; bullets max 14 words each.\n\n"
+        "You are a presentation designer. Reply with ONLY valid JSON (no markdown):\n"
+        "{\n"
+        '  "title": "short punchy title",\n'
+        '  "subtitle": "optional one-liner",\n'
+        '  "kicker": "optional eyebrow label",\n'
+        '  "layout": "cover|title_cards|split_image|two_column|big_number|bullets",\n'
+        '  "cards": [{"title":"...","body":"..."}],\n'
+        '  "columns": [{"heading":"...","bullets":["..."]}],\n'
+        '  "stat": {"value":"42%","label":"..."},\n'
+        '  "bullets": ["..."],\n'
+        '  "image_role": "hero|supporting|none"\n'
+        "}\n"
+        "Rules:\n"
+        "- Pick the layout that best fits the brief (features→title_cards or two_column; "
+        "cover/agenda→cover; KPI→big_number; narrative→split_image or bullets).\n"
+        "- title_cards: 2–4 cards with short title+body.\n"
+        "- two_column: exactly 2 columns with heading + 2–4 bullets each.\n"
+        "- Cover: title + subtitle + optional kicker; few or no bullets.\n"
+        "- Concrete facts from the brief only; no invented numbers.\n"
+        "- Titles ≤ 8 words; card bodies ≤ 18 words.\n\n"
         f"TITLE HINT: {title}\n"
         f"STYLE: {style_skill[:1200]}\n"
         f"DECK CONTEXT: {ctx}\n"
         f"BRIEF:\n{brief[:6000]}"
     )
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-    )
+    url = f"{base}/chat/completions"
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.4,
-        "max_tokens": 1200,
+        "temperature": 0.5,
+        "max_tokens": 1800,
     }
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=90.0) as client:
         resp = await client.post(
             url,
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             json=payload,
         )
     if resp.status_code >= 400:
-        raise RuntimeError(f"Gemini slide plan failed HTTP {resp.status_code}: {resp.text[:200]}")
+        raise RuntimeError(f"Slide plan LLM failed HTTP {resp.status_code}: {resp.text[:200]}")
     data = resp.json()
-    content = (
-        ((data.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
-    ).strip()
+    content = (((data.get("choices") or [{}])[0].get("message") or {}).get("content") or "").strip()
     if content.startswith("```"):
         content = re.sub(r"^```(?:json)?\s*", "", content)
         content = re.sub(r"\s*```$", "", content)
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError as e:
-        raise RuntimeError(f"Gemini returned non-JSON slide plan: {content[:200]}") from e
+        raise RuntimeError(f"Slide plan LLM returned non-JSON: {content[:200]}") from e
     if not isinstance(parsed, dict):
-        raise RuntimeError("Gemini slide plan was not an object")
+        raise RuntimeError("Slide plan was not an object")
     return parsed
 
 
@@ -120,13 +228,250 @@ async def _fetch_image(url: str) -> bytes | None:
     try:
         async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
             r = await client.get(url, headers={"User-Agent": "TrivOffice-SlideGen/1.0"})
-        if r.status_code == 200 and r.headers.get("content-type", "").startswith("image"):
-            return r.content
-        if r.status_code == 200 and len(r.content) > 1000:
+        if r.status_code == 200 and (
+            r.headers.get("content-type", "").startswith("image") or len(r.content) > 1000
+        ):
             return r.content
     except Exception:
         return None
     return None
+
+
+def _blank_slide(width_px: int, height_px: int) -> tuple[Presentation, Any, float, float]:
+    w_in = max(8.0, min(20.0, (width_px or 1280) / 96.0))
+    h_in = max(5.0, min(12.0, (height_px or 720) / 96.0))
+    prs = Presentation()
+    prs.slide_width = Inches(w_in)
+    prs.slide_height = Inches(h_in)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    return prs, slide, w_in, h_in
+
+
+def _layout_cover(slide: Any, w: float, h: float, s: dict[str, Any], c: dict[str, str], img: bytes | None) -> None:
+    _set_fill(
+        slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(h)),
+        c["bg"],
+    )
+    # Accent panel left third
+    panel = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w * 0.38), Inches(h))
+    _set_fill(panel, c["accent"])
+    kicker = str(s.get("kicker") or "").strip()
+    title = str(s.get("title") or "Slide").strip()[:100]
+    subtitle = str(s.get("subtitle") or "").strip()[:160]
+    y = Inches(h * 0.28)
+    if kicker:
+        _textbox(slide, Inches(0.55), y, Inches(w * 0.3), Inches(0.4), kicker.upper(), size=12, color="FFFFFF", bold=True)
+        y = Inches(h * 0.34)
+    _textbox(slide, Inches(0.55), y, Inches(w * 0.3), Inches(2.2), title, size=36, color="FFFFFF", bold=True)
+    if subtitle:
+        _textbox(
+            slide,
+            Inches(0.55),
+            Inches(h * 0.62),
+            Inches(w * 0.3),
+            Inches(1.2),
+            subtitle,
+            size=16,
+            color="FFFFFF",
+        )
+    if img:
+        try:
+            slide.shapes.add_picture(io.BytesIO(img), Inches(w * 0.38), Emu(0), width=Inches(w * 0.62), height=Inches(h))
+        except Exception:
+            pass
+
+
+def _layout_cards(slide: Any, w: float, h: float, s: dict[str, Any], c: dict[str, str]) -> None:
+    _set_fill(
+        slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(h)),
+        c["bg"],
+    )
+    # Top accent stripe
+    stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(0.12))
+    _set_fill(stripe, c["accent"])
+    title = str(s.get("title") or "Slide").strip()[:100]
+    subtitle = str(s.get("subtitle") or "").strip()[:140]
+    _textbox(slide, Inches(0.55), Inches(0.4), Inches(w - 1.1), Inches(0.7), title, size=30, color=c["text"], bold=True)
+    if subtitle:
+        _textbox(slide, Inches(0.55), Inches(1.05), Inches(w - 1.1), Inches(0.4), subtitle, size=14, color=c["muted"])
+
+    cards = s.get("cards") if isinstance(s.get("cards"), list) else []
+    cards = [x for x in cards if isinstance(x, dict)][:4]
+    if not cards:
+        bullets = s.get("bullets") if isinstance(s.get("bullets"), list) else []
+        cards = [{"title": f"{i+1}", "body": str(b)} for i, b in enumerate(bullets[:4])]
+    n = max(1, len(cards))
+    gap = 0.25
+    margin = 0.55
+    usable = w - 2 * margin - gap * (n - 1)
+    cw = usable / n
+    top_in = 1.55 if subtitle else 1.25
+    ch = max(2.5, h - top_in - 0.55)
+    for i, card in enumerate(cards):
+        left = margin + i * (cw + gap)
+        _round_rect(slide, Inches(left), Inches(top_in), Inches(cw), Inches(ch), c["card"], 0.12)
+        accent_bar = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE, Inches(left), Inches(top_in), Inches(cw), Inches(0.08)
+        )
+        _set_fill(accent_bar, c["accent"])
+        ct = str(card.get("title") or "").strip()[:40]
+        cb = str(card.get("body") or "").strip()[:120]
+        _textbox(
+            slide,
+            Inches(left + 0.2),
+            Inches(top_in + 0.35),
+            Inches(cw - 0.4),
+            Inches(0.6),
+            ct,
+            size=16,
+            color=c["text"],
+            bold=True,
+        )
+        _textbox(
+            slide,
+            Inches(left + 0.2),
+            Inches(top_in + 1.05),
+            Inches(cw - 0.4),
+            Inches(ch - 1.4),
+            cb,
+            size=13,
+            color=c["muted"],
+        )
+
+
+def _layout_split(slide: Any, w: float, h: float, s: dict[str, Any], c: dict[str, str], img: bytes | None) -> None:
+    _set_fill(
+        slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(h)),
+        c["bg"],
+    )
+    title = str(s.get("title") or "Slide").strip()[:100]
+    _textbox(slide, Inches(0.55), Inches(0.4), Inches(w * 0.5), Inches(0.9), title, size=28, color=c["text"], bold=True)
+    bullets = s.get("bullets") if isinstance(s.get("bullets"), list) else []
+    bullets = [str(b).strip() for b in bullets if str(b).strip()][:6]
+    body = slide.shapes.add_textbox(Inches(0.55), Inches(1.45), Inches(w * 0.48), Inches(h - 2.0))
+    _add_bullets(body.text_frame, bullets or [str(s.get("subtitle") or title)], size=16, color=c["text"])
+    # Image panel with rounded card behind
+    if img:
+        _round_rect(slide, Inches(w * 0.55), Inches(0.55), Inches(w * 0.4), Inches(h - 1.1), c["card"], 0.1)
+        try:
+            slide.shapes.add_picture(
+                io.BytesIO(img),
+                Inches(w * 0.58),
+                Inches(0.8),
+                width=Inches(w * 0.34),
+                height=Inches(h - 1.6),
+            )
+        except Exception:
+            pass
+    else:
+        # Accent block instead of missing image
+        _round_rect(slide, Inches(w * 0.55), Inches(0.55), Inches(w * 0.4), Inches(h - 1.1), c["accent"], 0.1)
+        _textbox(
+            slide,
+            Inches(w * 0.6),
+            Inches(h * 0.4),
+            Inches(w * 0.3),
+            Inches(1),
+            str(s.get("kicker") or s.get("subtitle") or ""),
+            size=18,
+            color="FFFFFF",
+            bold=True,
+            align=PP_ALIGN.CENTER,
+        )
+
+
+def _layout_two_column(slide: Any, w: float, h: float, s: dict[str, Any], c: dict[str, str]) -> None:
+    _set_fill(
+        slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(h)),
+        c["bg"],
+    )
+    stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(0.1))
+    _set_fill(stripe, c["accent"])
+    title = str(s.get("title") or "Slide").strip()[:100]
+    _textbox(slide, Inches(0.55), Inches(0.35), Inches(w - 1.1), Inches(0.7), title, size=28, color=c["text"], bold=True)
+    cols = s.get("columns") if isinstance(s.get("columns"), list) else []
+    cols = [x for x in cols if isinstance(x, dict)][:2]
+    if len(cols) < 2:
+        bullets = s.get("bullets") if isinstance(s.get("bullets"), list) else []
+        mid = max(1, len(bullets) // 2)
+        cols = [
+            {"heading": "Kenmerken", "bullets": [str(b) for b in bullets[:mid]]},
+            {"heading": "Voordelen", "bullets": [str(b) for b in bullets[mid:]]},
+        ]
+    for i, col in enumerate(cols):
+        left = 0.55 + i * (w * 0.48)
+        _round_rect(slide, Inches(left), Inches(1.25), Inches(w * 0.42), Inches(h - 1.9), c["card"], 0.1)
+        _textbox(
+            slide,
+            Inches(left + 0.25),
+            Inches(1.5),
+            Inches(w * 0.36),
+            Inches(0.5),
+            str(col.get("heading") or f"Column {i+1}")[:40],
+            size=18,
+            color=c["accent"],
+            bold=True,
+        )
+        bl = col.get("bullets") if isinstance(col.get("bullets"), list) else []
+        bl = [str(b).strip() for b in bl if str(b).strip()][:5]
+        box = slide.shapes.add_textbox(Inches(left + 0.25), Inches(2.15), Inches(w * 0.36), Inches(h - 3.0))
+        _add_bullets(box.text_frame, bl or ["—"], size=14, color=c["text"])
+
+
+def _layout_big_number(slide: Any, w: float, h: float, s: dict[str, Any], c: dict[str, str]) -> None:
+    _set_fill(
+        slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(h)),
+        c["bg"],
+    )
+    title = str(s.get("title") or "Slide").strip()[:80]
+    stat = s.get("stat") if isinstance(s.get("stat"), dict) else {}
+    value = str(stat.get("value") or "").strip() or "—"
+    label = str(stat.get("label") or s.get("subtitle") or "").strip()[:80]
+    _textbox(slide, Inches(0.7), Inches(0.5), Inches(w - 1.4), Inches(0.6), title, size=22, color=c["muted"], bold=True)
+    _textbox(
+        slide,
+        Inches(0.7),
+        Inches(h * 0.28),
+        Inches(w - 1.4),
+        Inches(1.8),
+        value[:20],
+        size=72,
+        color=c["accent"],
+        bold=True,
+        align=PP_ALIGN.CENTER,
+    )
+    if label:
+        _textbox(
+            slide,
+            Inches(1.5),
+            Inches(h * 0.58),
+            Inches(w - 3),
+            Inches(1),
+            label,
+            size=20,
+            color=c["text"],
+            align=PP_ALIGN.CENTER,
+        )
+    bullets = s.get("bullets") if isinstance(s.get("bullets"), list) else []
+    bullets = [str(b).strip() for b in bullets if str(b).strip()][:3]
+    if bullets:
+        box = slide.shapes.add_textbox(Inches(1.5), Inches(h * 0.72), Inches(w - 3), Inches(1.4))
+        _add_bullets(box.text_frame, bullets, size=14, color=c["muted"])
+
+
+def _layout_bullets(slide: Any, w: float, h: float, s: dict[str, Any], c: dict[str, str]) -> None:
+    _set_fill(
+        slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(w), Inches(h)),
+        c["bg"],
+    )
+    bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), Inches(0.18), Inches(h))
+    _set_fill(bar, c["accent"])
+    title = str(s.get("title") or "Slide").strip()[:100]
+    _textbox(slide, Inches(0.6), Inches(0.45), Inches(w - 1.2), Inches(0.9), title, size=30, color=c["text"], bold=True)
+    bullets = s.get("bullets") if isinstance(s.get("bullets"), list) else []
+    bullets = [str(b).strip() for b in bullets if str(b).strip()][:7]
+    box = slide.shapes.add_textbox(Inches(0.75), Inches(1.5), Inches(w - 1.5), Inches(h - 2.1))
+    _add_bullets(box.text_frame, bullets or [str(s.get("subtitle") or title)], size=18, color=c["text"])
 
 
 def _build_pptx(
@@ -137,79 +482,25 @@ def _build_pptx(
     width_px: int,
     height_px: int,
 ) -> bytes:
-    # Map CSS-ish pixels (1280×720) onto inches at 96dpi
-    w_in = max(8.0, min(20.0, (width_px or 1280) / 96.0))
-    h_in = max(5.0, min(12.0, (height_px or 720) / 96.0))
-    prs = Presentation()
-    prs.slide_width = Inches(w_in)
-    prs.slide_height = Inches(h_in)
-    slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
-
-    # Background fill via a full-bleed rectangle (more reliable than slide background theme)
-    bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(0), Emu(0), prs.slide_width, prs.slide_height)
-    bg.fill.solid()
-    bg.fill.fore_color.rgb = _rgb(colors["bg"], "FFFFFF")
-    bg.line.fill.background()
-
-    # Accent bar on the left
-    bar = slide.shapes.add_shape(
-        MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(0.18), prs.slide_height
-    )
-    bar.fill.solid()
-    bar.fill.fore_color.rgb = _rgb(colors["accent"], "2563EB")
-    bar.line.fill.background()
-
-    title = str(structure.get("title") or "Slide").strip()[:120]
-    subtitle = str(structure.get("subtitle") or "").strip()[:160]
-    bullets = structure.get("bullets") or []
-    if not isinstance(bullets, list):
-        bullets = [str(bullets)]
-    bullets = [str(b).strip() for b in bullets if str(b).strip()][:8]
-
-    has_image = bool(image_bytes)
-    text_right = Inches(w_in - 0.6) if not has_image else Inches(w_in * 0.55)
-
-    title_box = slide.shapes.add_textbox(Inches(0.55), Inches(0.35), text_right - Inches(0.55), Inches(1.1))
-    tf = title_box.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.text = title
-    p.font.size = Pt(32)
-    p.font.bold = True
-    p.font.color.rgb = _rgb(colors["text"], "1A1A2E")
-    p.alignment = PP_ALIGN.LEFT
-
-    y = Inches(1.4)
-    if subtitle:
-        sub_box = slide.shapes.add_textbox(Inches(0.55), y, text_right - Inches(0.55), Inches(0.5))
-        st = sub_box.text_frame.paragraphs[0]
-        st.text = subtitle
-        st.font.size = Pt(16)
-        st.font.color.rgb = _rgb(colors["accent"], "2563EB")
-        y = Inches(1.95)
-
-    body_box = slide.shapes.add_textbox(
-        Inches(0.55), y, text_right - Inches(0.55), Inches(h_in) - y - Inches(0.4)
-    )
-    btf = body_box.text_frame
-    btf.word_wrap = True
-    for i, bullet in enumerate(bullets or [title]):
-        para = btf.paragraphs[0] if i == 0 else btf.add_paragraph()
-        para.text = bullet
-        para.level = 0
-        para.font.size = Pt(18)
-        para.font.color.rgb = _rgb(colors["text"], "1A1A2E")
-        para.space_after = Pt(10)
-
-    if has_image and image_bytes:
-        img_left = Inches(w_in * 0.58)
-        img_top = Inches(1.3)
-        img_w = Inches(w_in * 0.36)
-        img_h = Inches(h_in - 2.0)
-        try:
-            slide.shapes.add_picture(io.BytesIO(image_bytes), img_left, img_top, width=img_w, height=img_h)
-        except Exception:
-            pass
+    prs, slide, w, h = _blank_slide(width_px, height_px)
+    layout = str(structure.get("layout") or "title_cards").strip().lower()
+    if layout not in LAYOUTS:
+        layout = "title_cards"
+    # Prefer cards when Gemini forgot but gave cards
+    if layout == "bullets" and isinstance(structure.get("cards"), list) and structure["cards"]:
+        layout = "title_cards"
+    if layout == "cover":
+        _layout_cover(slide, w, h, structure, colors, image_bytes)
+    elif layout == "title_cards":
+        _layout_cards(slide, w, h, structure, colors)
+    elif layout == "split_image":
+        _layout_split(slide, w, h, structure, colors, image_bytes)
+    elif layout == "two_column":
+        _layout_two_column(slide, w, h, structure, colors)
+    elif layout == "big_number":
+        _layout_big_number(slide, w, h, structure, colors)
+    else:
+        _layout_bullets(slide, w, h, structure, colors)
 
     out = io.BytesIO()
     prs.save(out)
@@ -229,14 +520,15 @@ async def generate_slide_pptx(payload: dict[str, Any]) -> dict[str, Any]:
     width = int(payload.get("width") or 1280)
     height = int(payload.get("height") or 720)
 
-    structure = await _gemini_structure(
+    structure = await _llm_structure(
         brief=brief, title=title, style_skill=style_skill, deck_context=deck_context
     )
     if title and not structure.get("title"):
         structure["title"] = title
 
     image_bytes = None
-    if isinstance(images, list):
+    role = str(structure.get("image_role") or "supporting").lower()
+    if role != "none" and isinstance(images, list):
         for item in images[:3]:
             url = item.get("url") if isinstance(item, dict) else item
             if isinstance(url, str) and url.startswith("http"):
@@ -248,9 +540,11 @@ async def generate_slide_pptx(payload: dict[str, Any]) -> dict[str, Any]:
     pptx_bytes = _build_pptx(
         structure, colors=colors, image_bytes=image_bytes, width_px=width, height_px=height
     )
-    model = os.environ.get("GEMINI_DEFAULT_MODEL", "gemini-2.5-flash")
+    _, _, model = _llm_openai_endpoint()
+    model = model or os.environ.get("NVIDIA_DEFAULT_MODEL", "z-ai/glm-5.2")
     return {
         "pptx_base64": base64.b64encode(pptx_bytes).decode("ascii"),
         "model": f"trivena-local/{model}",
         "title": structure.get("title"),
+        "layout": structure.get("layout"),
     }

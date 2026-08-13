@@ -29,16 +29,10 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
   {
     id: 'genspark',
     label: 'Trivena Cloud',
-    // Gemini models via cloud.trivena.tech (Google AI Studio key on the server).
-    // OpenRouter-style google/* ids still work; the gateway normalizes them.
-    models: [
-      'gemini-2.5-flash',
-      'gemini-2.5-pro',
-      'gemini-2.0-flash',
-      'google/gemini-2.5-flash',
-      'google/gemini-2.5-pro',
-    ],
-    defaultModel: 'gemini-2.5-flash',
+    // NVIDIA NIM models via cloud.trivena.tech (NVIDIA_API_KEY on the server).
+    // Legacy Gemini ids still work; the gateway remaps them to the NIM default.
+    models: ['z-ai/glm-5.2'],
+    defaultModel: 'z-ai/glm-5.2',
     keyPlaceholder: 'Not required — sign in to Trivena Cloud',
   },
   {
@@ -128,8 +122,14 @@ export function resolveAiSettings(
     }
     return defaults
   }
+  const providers = { ...defaults.providers, ...stored.providers }
+  // Migrate Trivena Cloud users off Gemini defaults onto NVIDIA GLM.
+  const genspark = providers.genspark
+  if (genspark?.model && /^(gemini|google\/)/i.test(genspark.model)) {
+    providers.genspark = { ...genspark, model: defaults.providers.genspark.model }
+  }
   return {
     provider: stored.provider ?? defaults.provider,
-    providers: { ...defaults.providers, ...stored.providers },
+    providers,
   }
 }
