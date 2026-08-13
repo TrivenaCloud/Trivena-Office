@@ -27,4 +27,7 @@ Nginx snippets: `nginx-office-auth.conf` (already applied on press host).
 
 - `FRAPPE_BASE_URL` — default `https://cloud.trivena.tech`
 - `PUBLIC_BASE_URL` — auth URLs shown to the desktop
-- `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY` — optional LLM gateway
+- `GEMINI_API_KEY` — primary LLM gateway (Google AI Studio; OpenAI-compatible proxy)
+- `GEMINI_DEFAULT_MODEL` — default `gemini-2.5-flash`
+- `OPENROUTER_API_KEY` — fallback if Gemini is unset
+- `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` — optional direct vendor proxies

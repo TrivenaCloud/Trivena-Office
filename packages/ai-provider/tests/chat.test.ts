@@ -106,19 +106,14 @@ describe('chatForProvider', () => {
       .fn()
       .mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     vi.stubGlobal('fetch', fetchMock)
-    await chatForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'anthropic/claude-sonnet-4.6' },
-      'sys',
-      'hi',
-    )
+    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gemini-2.5-flash' }, 'sys', 'hi')
     expect(fetchMock).toHaveBeenCalledWith(
       'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
       expect.objectContaining({
         headers: expect.objectContaining({ Authorization: 'Bearer gsk-k' }),
       }),
     )
-    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'openai/gpt-5' }, 'sys', 'hi')
+    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gemini-2.5-pro' }, 'sys', 'hi')
     expect(fetchMock).toHaveBeenLastCalledWith(
       'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
       expect.anything(),
@@ -130,12 +125,7 @@ describe('chatForProvider', () => {
       .fn()
       .mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     vi.stubGlobal('fetch', fetchMock)
-    await chatForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'anthropic/claude-sonnet-4.6' },
-      'sys',
-      'hi',
-    )
+    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gemini-2.5-flash' }, 'sys', 'hi')
     expect((fetchMock.mock.calls[0]![1].headers as Record<string, string>)['X-Agent-Type']).toBe(
       'trivoffice',
     )

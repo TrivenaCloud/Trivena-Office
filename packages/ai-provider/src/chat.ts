@@ -24,7 +24,7 @@ async function chatAnthropic(
     },
     body: JSON.stringify({
       model: config.model,
-      max_tokens: 2048,
+      max_tokens: 8192,
       system,
       messages: [{ role: 'user', content: user }],
     }),
@@ -135,7 +135,7 @@ export async function chatForProvider(
   return wd.guard(() => {
     switch (provider) {
       case 'genspark':
-        // Trivena Cloud → OpenRouter (OpenAI-compatible)
+        // Trivena Cloud → Gemini (OpenAI-compatible Google endpoint) by default.
         return chatOpenAiCompatible(wd, GENSPARK_LLM_BASE_URLS.openai, config, system, user)
       case 'anthropic':
         return chatAnthropic(wd, config, system, user)

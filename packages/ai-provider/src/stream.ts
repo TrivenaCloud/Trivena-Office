@@ -855,8 +855,7 @@ export async function streamForProvider(
 ): Promise<void> {
   switch (provider) {
     case 'genspark':
-      // Trivena Cloud → OpenRouter (OpenAI-compatible). Model ids are OpenRouter
-      // slugs (e.g. anthropic/claude-sonnet-4.6); always use the openai path.
+      // Trivena Cloud → Gemini (OpenAI-compatible Google endpoint) by default.
       return streamOpenAiCompatible(
         GENSPARK_LLM_BASE_URLS.openai,
         config,
