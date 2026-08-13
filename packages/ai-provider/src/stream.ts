@@ -855,30 +855,8 @@ export async function streamForProvider(
 ): Promise<void> {
   switch (provider) {
     case 'genspark':
-      // The proxy exposes three protocol-specific endpoints; route by model id prefix: claude uses
-      // the Anthropic protocol (preserves image input fidelity), gemini uses Gemini, rest OpenAI-compatible
-      if (config.model.startsWith('claude')) {
-        return streamAnthropic(
-          config,
-          system,
-          messages,
-          tools,
-          maxTokens,
-          cb,
-          GENSPARK_LLM_BASE_URLS.anthropic,
-        )
-      }
-      if (config.model.startsWith('gemini')) {
-        return streamGemini(
-          config,
-          system,
-          messages,
-          tools,
-          maxTokens,
-          cb,
-          GENSPARK_LLM_BASE_URLS.gemini,
-        )
-      }
+      // Trivena Cloud → OpenRouter (OpenAI-compatible). Model ids are OpenRouter
+      // slugs (e.g. anthropic/claude-sonnet-4.6); always use the openai path.
       return streamOpenAiCompatible(
         GENSPARK_LLM_BASE_URLS.openai,
         config,

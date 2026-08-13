@@ -101,18 +101,26 @@ describe('chatForProvider', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('genspark: routes by model prefix to the proxy endpoints', async () => {
+  it('genspark: routes all models to the OpenAI-compatible OpenRouter proxy', async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(jsonResponse({ content: [{ type: 'text', text: 'ok' }] }))
+      .mockImplementation(async () =>
+        jsonResponse({ choices: [{ message: { content: 'ok' } }] }),
+      )
     vi.stubGlobal('fetch', fetchMock)
-    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'claude-opus-4-7' }, 'sys', 'hi')
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://cloud.trivena.tech/api/llm/anthropic/v1/messages',
-      expect.anything(),
+    await chatForProvider(
+      'genspark',
+      { apiKey: 'gsk-k', model: 'anthropic/claude-sonnet-4.6' },
+      'sys',
+      'hi',
     )
-    fetchMock.mockResolvedValue(jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
-    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gpt-5.2' }, 'sys', 'hi')
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: 'Bearer gsk-k' }),
+      }),
+    )
+    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'openai/gpt-5' }, 'sys', 'hi')
     expect(fetchMock).toHaveBeenLastCalledWith(
       'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
       expect.anything(),
@@ -122,9 +130,16 @@ describe('chatForProvider', () => {
   it('genspark: stamps X-Agent-Type; direct vendors do not get it', async () => {
     const fetchMock = vi
       .fn()
-      .mockImplementation(async () => jsonResponse({ content: [{ type: 'text', text: 'ok' }] }))
+      .mockImplementation(async () =>
+        jsonResponse({ choices: [{ message: { content: 'ok' } }] }),
+      )
     vi.stubGlobal('fetch', fetchMock)
-    await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'claude-opus-4-7' }, 'sys', 'hi')
+    await chatForProvider(
+      'genspark',
+      { apiKey: 'gsk-k', model: 'anthropic/claude-sonnet-4.6' },
+      'sys',
+      'hi',
+    )
     expect((fetchMock.mock.calls[0]![1].headers as Record<string, string>)['X-Agent-Type']).toBe(
       'trivoffice',
     )

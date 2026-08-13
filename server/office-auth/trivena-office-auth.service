@@ -7,6 +7,7 @@ Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/opt/trivena/office-auth
+EnvironmentFile=-/etc/trivena-office-auth.env
 Environment=OFFICE_AUTH_DATA=/var/lib/trivena-office-auth
 Environment=FRAPPE_BASE_URL=https://cloud.trivena.tech
 Environment=PUBLIC_BASE_URL=https://cloud.trivena.tech

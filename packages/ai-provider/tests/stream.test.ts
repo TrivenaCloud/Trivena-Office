@@ -680,75 +680,25 @@ describe('streamForProvider: openai-compatible', () => {
 })
 
 describe('streamForProvider: genspark', () => {
-  it('routes claude models to the Anthropic-compatible proxy endpoint', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream([])))
-    vi.stubGlobal('fetch', fetchMock)
-    const { cb } = collector()
-    await streamForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'claude-opus-4-7' },
-      'sys',
-      [],
-      [],
-      100,
-      cb,
-    ).catch(() => {})
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://cloud.trivena.tech/api/llm/anthropic/v1/messages',
-      expect.objectContaining({ headers: expect.objectContaining({ 'x-api-key': 'gsk-k' }) }),
-    )
-  })
-
-  it('routes gemini models to the Gemini proxy with header auth', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream([])))
-    vi.stubGlobal('fetch', fetchMock)
-    const { cb } = collector()
-    await streamForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'gemini-3-flash-preview' },
-      'sys',
-      [],
-      [],
-      100,
-      cb,
-    ).catch(() => {})
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://cloud.trivena.tech/api/llm/gemini/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse',
-      expect.objectContaining({ headers: expect.objectContaining({ 'x-goog-api-key': 'gsk-k' }) }),
-    )
-  })
-
-  it('routes other models to the OpenAI-compatible proxy', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream(['data: [DONE]'])))
-    vi.stubGlobal('fetch', fetchMock)
-    const { cb } = collector()
-    await streamForProvider(
-      'genspark',
-      { apiKey: 'gsk-k', model: 'gpt-5.2' },
-      'sys',
-      [],
-      [],
-      100,
-      cb,
-    ).catch(() => {})
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
-      expect.anything(),
-    )
-  })
-
-  it('stamps X-Agent-Type on all three proxy routes for billing attribution', async () => {
-    for (const model of ['claude-opus-4-7', 'gemini-3-flash-preview', 'gpt-5.2']) {
-      const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream([])))
+  it('routes all Trivena Cloud models through the OpenAI-compatible OpenRouter proxy', async () => {
+    for (const model of [
+      'anthropic/claude-sonnet-4.6',
+      'google/gemini-2.5-flash',
+      'openai/gpt-5',
+    ]) {
+      const fetchMock = vi.fn().mockResolvedValue(okResponse(sseStream(['data: [DONE]'])))
       vi.stubGlobal('fetch', fetchMock)
       const { cb } = collector()
       await streamForProvider('genspark', { apiKey: 'gsk-k', model }, 'sys', [], [], 100, cb).catch(
         () => {},
       )
       expect(fetchMock).toHaveBeenCalledWith(
-        expect.anything(),
+        'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
         expect.objectContaining({
-          headers: expect.objectContaining({ 'X-Agent-Type': 'trivoffice' }),
+          headers: expect.objectContaining({
+            Authorization: 'Bearer gsk-k',
+            'X-Agent-Type': 'trivoffice',
+          }),
         }),
       )
     }

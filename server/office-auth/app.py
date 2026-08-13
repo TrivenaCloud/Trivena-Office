@@ -29,7 +29,7 @@ from urllib.parse import quote
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 ROOT = Path(__file__).resolve().parent
@@ -419,35 +419,47 @@ async def llm_anthropic(path: str, request: Request, authorization: str | None =
 
 @app.api_route("/api/llm/openai/v1/{path:path}", methods=["GET", "POST"])
 async def llm_openai(path: str, request: Request, authorization: str | None = Header(default=None)):
-    _require_office_key(authorization)
-    api_key = os.environ.get("OPENAI_API_KEY", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    """Proxy OpenAI-compatible traffic to OpenRouter (primary TrivOffice path)."""
+    email = _require_office_key(authorization)
+    api_key = os.environ.get("OPENROUTER_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
     if not api_key:
         return JSONResponse(
             {
                 "error": {
-                    "message": "Trivena Cloud LLM gateway is signed-in ready, but OPENAI_API_KEY is not configured on the server yet.",
+                    "message": "OPENROUTER_API_KEY is not configured on the Trivena Cloud gateway.",
                     "type": "server_error",
                 }
             },
             status_code=503,
         )
     body = await request.body()
-    # Prefer OpenAI; if only Anthropic is configured, return clear error for openai path
-    if not os.environ.get("OPENAI_API_KEY"):
-        return JSONResponse(
-            {
-                "error": {
-                    "message": "OPENAI_API_KEY not configured. Use an Anthropic model or set OPENAI_API_KEY on the gateway.",
-                    "type": "server_error",
-                }
-            },
-            status_code=503,
-        )
-    headers = {"authorization": f"Bearer {os.environ['OPENAI_API_KEY']}", "content-type": "application/json"}
-    url = f"https://api.openai.com/v1/{path}"
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        upstream = await client.request(request.method, url, content=body, headers=headers)
-    return Response(content=upstream.content, status_code=upstream.status_code, media_type=upstream.headers.get("content-type"))
+    headers = {
+        "authorization": f"Bearer {api_key}",
+        "content-type": request.headers.get("content-type", "application/json"),
+        "HTTP-Referer": os.environ.get("PUBLIC_BASE_URL", "https://cloud.trivena.tech"),
+        "X-Title": "TrivOffice",
+        "X-Trivena-User": email,
+    }
+    # OpenRouter is OpenAI-compatible at /api/v1/*
+    base = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
+    url = f"{base}/{path}"
+    client = httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=30.0))
+    req = client.build_request(request.method, url, content=body, headers=headers)
+    upstream = await client.send(req, stream=True)
+
+    async def relay():
+        try:
+            async for chunk in upstream.aiter_bytes():
+                yield chunk
+        finally:
+            await upstream.aclose()
+            await client.aclose()
+
+    return StreamingResponse(
+        relay(),
+        status_code=upstream.status_code,
+        media_type=upstream.headers.get("content-type", "application/json"),
+    )
 
 
 @app.api_route("/api/llm/gemini/v1beta/{path:path}", methods=["GET", "POST"])

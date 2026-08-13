@@ -135,12 +135,7 @@ export async function chatForProvider(
   return wd.guard(() => {
     switch (provider) {
       case 'genspark':
-        if (config.model.startsWith('claude')) {
-          return chatAnthropic(wd, config, system, user, GENSPARK_LLM_BASE_URLS.anthropic)
-        }
-        if (config.model.startsWith('gemini')) {
-          return chatGemini(wd, config, system, user, GENSPARK_LLM_BASE_URLS.gemini)
-        }
+        // Trivena Cloud → OpenRouter (OpenAI-compatible)
         return chatOpenAiCompatible(wd, GENSPARK_LLM_BASE_URLS.openai, config, system, user)
       case 'anthropic':
         return chatAnthropic(wd, config, system, user)
