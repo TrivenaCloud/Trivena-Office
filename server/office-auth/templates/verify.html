@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Authorize TrivOffice — Trivena Cloud</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a222d;
+      --text: #f3f6fa;
+      --muted: #9aa7b5;
+      --accent: #3d8bfd;
+      --accent-hover: #5c9fff;
+      --danger: #e35d6a;
+      --ok: #3ecf8e;
+      --border: #2a3544;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, #1c3a5f 0%, transparent 50%),
+                  radial-gradient(900px 500px at 100% 0%, #2a2450 0%, transparent 45%),
+                  var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3d8bfd, #7c5cff);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 8px; font-weight: 650; }
+    p { margin: 0 0 12px; color: var(--muted); line-height: 1.45; font-size: .95rem; }
+    .email { color: var(--text); font-weight: 600; }
+    .error {
+      background: rgba(227,93,106,.12);
+      border: 1px solid rgba(227,93,106,.35);
+      color: #ffb4bc;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: .9rem;
+    }
+    .ok {
+      background: rgba(62,207,142,.12);
+      border: 1px solid rgba(62,207,142,.35);
+      color: #9af0c6;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: .95rem;
+    }
+    .actions { display: flex; gap: 10px; margin-top: 20px; }
+    button {
+      flex: 1;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .approve { background: var(--accent); color: white; }
+    .approve:hover { background: var(--accent-hover); }
+    .deny { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .deny:hover { color: var(--text); border-color: #3d4b5c; }
+    .foot { margin-top: 18px; font-size: .8rem; color: var(--muted); text-align: center; }
+    a { color: var(--accent-hover); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="mark">T</div>
+      <div>
+        <div style="font-weight:700">Trivena Cloud</div>
+        <div style="font-size:.8rem;color:var(--muted)">Desktop authorization</div>
+      </div>
+    </div>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if done %}
+      <div class="ok">TrivOffice is authorized{% if email %} for <span class="email">{{ email }}</span>{% endif %}. You can return to the app and close this window.</div>
+      <h1>You're signed in</h1>
+      <p>The TrivOffice desktop app will finish connecting automatically.</p>
+    {% elif email and not error %}
+      <h1>Authorize TrivOffice?</h1>
+      <p>Signed in as <span class="email">{{ email }}</span>. Allow the TrivOffice desktop app to use your Trivena Cloud account for AI and sync features?</p>
+      <form method="post" action="/office-auth/verify" class="actions">
+        <input type="hidden" name="code" value="{{ code }}" />
+        <button class="deny" type="submit" name="action" value="deny">Deny</button>
+        <button class="approve" type="submit" name="action" value="approve">Authorize</button>
+      </form>
+    {% elif not error %}
+      <h1>Sign in required</h1>
+      <p>Redirecting you to Trivena Cloud login…</p>
+    {% endif %}
+
+    <div class="foot">
+      <a href="{{ request.base_url }}">Trivena Cloud</a>
+    </div>
+  </div>
+</body>
+</html>

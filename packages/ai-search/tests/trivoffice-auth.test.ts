@@ -16,7 +16,7 @@ import {
 import { gskApiKey, setGskProxyUrl } from '../src/gsk'
 
 const CODE = 'a'.repeat(64)
-const AUTH_URL = `https://www.genspark.ai/api/office_addin_auth/verify?code=${CODE}`
+const AUTH_URL = `https://cloud.trivena.tech/office-auth/verify?code=${CODE}`
 
 let dir: string
 
@@ -75,8 +75,7 @@ function stubFlow(opts: { pendingPolls?: number; createResponse?: unknown } = {}
       return jsonResponse(
         opts.createResponse ?? {
           status: 0,
-          // key_name stays "genoffice" — Genspark billing attribution API id
-          data: { key_id: 'kid-1', key_name: 'genoffice', token: 'gsk-trivoffice-key' },
+          data: { key_id: 'kid-1', key_name: 'trivoffice', token: 'trk-trivoffice-key' },
         },
       )
     }
@@ -106,25 +105,25 @@ describe('startTrivofficeLogin', () => {
 
     const saved = JSON.parse(readFileSync(trivofficeAuthPath(), 'utf-8'))
     expect(saved).toEqual({
-      api_key: 'gsk-trivoffice-key',
+      api_key: 'trk-trivoffice-key',
       key_id: 'kid-1',
       access_token: 'bearer-token',
     })
     expect(statSync(trivofficeAuthPath()).mode & 0o777).toBe(0o600)
-    expect(trivofficeApiKey()).toBe('gsk-trivoffice-key')
+    expect(trivofficeApiKey()).toBe('trk-trivoffice-key')
     expect(trivofficeLoginInFlight()).toBe(false)
 
     // the key create call must ride on the session cookie
     const createCall = fetchMock.mock.calls.find(([u]) => String(u).includes('/api_tokens/create'))!
     const init = createCall[1]!
     expect((init.headers as Record<string, string>).Cookie).toBe('session_id=sess-abc')
-    expect(JSON.parse(String(init.body))).toEqual({ key_name: 'genoffice' })
+    expect(JSON.parse(String(init.body))).toEqual({ key_name: 'trivoffice' })
   })
 
   it('feeds gskApiKey(), losing only to an explicit GSK_API_KEY env override', async () => {
     stubFlow()
     await loginAndCollect()
-    expect(gskApiKey()).toBe('gsk-trivoffice-key')
+    expect(gskApiKey()).toBe('trk-trivoffice-key')
     process.env.GSK_API_KEY = 'gsk-env-override'
     expect(gskApiKey()).toBe('gsk-env-override')
   })
@@ -155,7 +154,7 @@ describe('startTrivofficeLogin', () => {
     const events = await loginAndCollect()
     expect(deviceCodeCalls).toBe(2)
     expect(events.at(-1)).toEqual({ phase: 'success' })
-    expect(trivofficeApiKey()).toBe('gsk-trivoffice-key')
+    expect(trivofficeApiKey()).toBe('trk-trivoffice-key')
     expect(trivofficeProxyFallbackPreferred()).toBe(true)
   })
 
@@ -227,10 +226,10 @@ describe('startTrivofficeLogin', () => {
     await loginAndCollect()
 
     const fetchMock = stubFlow({
-      createResponse: { status: 0, data: { key_id: 'kid-2', token: 'gsk-trivoffice-key-2' } },
+      createResponse: { status: 0, data: { key_id: 'kid-2', token: 'trk-trivoffice-key-2' } },
     })
     await loginAndCollect()
-    expect(loadGenofficeAuth()).toMatchObject({ apiKey: 'gsk-trivoffice-key-2', keyId: 'kid-2' })
+    expect(loadGenofficeAuth()).toMatchObject({ apiKey: 'trk-trivoffice-key-2', keyId: 'kid-2' })
     await vi.waitFor(() => {
       const revoke = fetchMock.mock.calls.find(([u]) => String(u).includes('/api_tokens/revoke'))
       expect(revoke).toBeDefined()

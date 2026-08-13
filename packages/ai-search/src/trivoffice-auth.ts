@@ -1,13 +1,9 @@
 /**
- * TrivOffice's own Genspark identity: device-code login (office_addin_auth,
- * app_type=trivoffice) minting a gsk API key named "trivoffice" — the key_name
- * lands in billing as billing_tag, attributing all traffic (incl. gsk CLI
- * subprocesses) to TrivOffice. Stored in ~/.trivoffice/auth.json, deliberately
- * NOT the shared config.json that Claw Desktop overwrites on every launch.
+ * TrivOffice ↔ Trivena Cloud identity: device-code login (office_addin_auth)
+ * minting an API key named "trivoffice". Stored in ~/.trivoffice/auth.json.
  *
- * Flow: POST /device_code → browser approve → poll /token for a 30-day Bearer
- * → POST /session for a cookie → POST /api/api_tokens/create. The Bearer is
- * kept to rebuild a session later (key revoke on logout).
+ * Flow: POST /device_code → browser approve on cloud.trivena.tech → poll /token
+ * → POST /session for a cookie → POST /api/api_tokens/create.
  */
 
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
@@ -25,12 +21,17 @@ export interface GskLoginProgress {
   error?: string
 }
 
-const APP_TYPE = 'genoffice'
-const KEY_NAME = 'genoffice'
+const APP_TYPE = 'trivoffice'
+const KEY_NAME = 'trivoffice'
 const HTTP_TIMEOUT_MS = 30_000
 
+/** Override for tests / staging. Production default is Trivena Cloud. */
 function baseUrl(): string {
-  return (process.env.GSK_BASE_URL || 'https://www.genspark.ai').replace(/\/$/, '')
+  return (
+    process.env.TRIVOFFICE_AUTH_BASE_URL ||
+    process.env.GSK_BASE_URL ||
+    'https://cloud.trivena.tech'
+  ).replace(/\/$/, '')
 }
 
 let cachedFetch: typeof fetch | undefined

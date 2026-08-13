@@ -108,13 +108,13 @@ describe('chatForProvider', () => {
     vi.stubGlobal('fetch', fetchMock)
     await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'claude-opus-4-7' }, 'sys', 'hi')
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://www.genspark.ai/api/anthropic/v1/messages',
+      'https://cloud.trivena.tech/api/llm/anthropic/v1/messages',
       expect.anything(),
     )
     fetchMock.mockResolvedValue(jsonResponse({ choices: [{ message: { content: 'ok' } }] }))
     await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'gpt-5.2' }, 'sys', 'hi')
     expect(fetchMock).toHaveBeenLastCalledWith(
-      'https://www.genspark.ai/api/llm_proxy/v1/chat/completions',
+      'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
       expect.anything(),
     )
   })
@@ -126,7 +126,7 @@ describe('chatForProvider', () => {
     vi.stubGlobal('fetch', fetchMock)
     await chatForProvider('genspark', { apiKey: 'gsk-k', model: 'claude-opus-4-7' }, 'sys', 'hi')
     expect((fetchMock.mock.calls[0]![1].headers as Record<string, string>)['X-Agent-Type']).toBe(
-      'genoffice',
+      'trivoffice',
     )
     fetchMock.mockClear()
     await chatForProvider('anthropic', { apiKey: 'k', model: 'claude-opus-4-7' }, 'sys', 'hi')

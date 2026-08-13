@@ -1,33 +1,30 @@
 import type { AiProviderId, AiProviderMeta, AiSettings, LegacyAiSettings } from './types'
 
 /**
- * Genspark server-side LLM proxy endpoints. All three protocols share the
- * api_key from the gsk login; model ids follow the proxy's own naming scheme,
- * which differs from the official vendor ids.
+ * Trivena Cloud LLM proxy endpoints (OpenAI/Anthropic/Gemini compatible).
+ * Auth uses the TrivOffice API key from Trivena Cloud sign-in.
  */
 export const GENSPARK_LLM_BASE_URLS = {
-  anthropic: 'https://www.genspark.ai/api/anthropic',
-  gemini: 'https://www.genspark.ai/api/llm_proxy/gemini/v1beta',
-  openai: 'https://www.genspark.ai/api/llm_proxy/v1',
+  anthropic: 'https://cloud.trivena.tech/api/llm/anthropic',
+  gemini: 'https://cloud.trivena.tech/api/llm/gemini/v1beta',
+  openai: 'https://cloud.trivena.tech/api/llm/openai/v1',
 } as const
 
-/**
- * Splits TrivOffice usage out of the proxy's default "Claw" billing bucket
- * (the backend attributes gsk-key traffic by X-Agent-Type). Only sent to the
- * Genspark proxy — never to direct vendor APIs.
- */
-export const GENSPARK_AGENT_TYPE = 'genoffice'
+/** Billing / telemetry agent type for Trivena-proxied traffic. */
+export const GENSPARK_AGENT_TYPE = 'trivoffice'
 
 export function gensparkAttributionHeaders(baseUrl?: string): Record<string, string> {
-  return baseUrl?.startsWith('https://www.genspark.ai')
-    ? { 'X-Agent-Type': GENSPARK_AGENT_TYPE }
-    : {}
+  if (!baseUrl) return {}
+  if (baseUrl.includes('genspark.ai') || baseUrl.includes('trivena.tech') || baseUrl.includes('trivena.app')) {
+    return { 'X-Agent-Type': GENSPARK_AGENT_TYPE }
+  }
+  return {}
 }
 
 export const AI_PROVIDERS: AiProviderMeta[] = [
   {
     id: 'genspark',
-    label: 'Genspark',
+    label: 'Trivena Cloud',
     models: [
       'claude-opus-4-7',
       'claude-opus-4-8',
@@ -38,7 +35,7 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
       'gemini-3-flash-preview',
     ],
     defaultModel: 'claude-opus-4-7',
-    keyPlaceholder: 'Not required - sign in to Genspark',
+    keyPlaceholder: 'Not required — sign in to Trivena Cloud',
   },
   {
     id: 'anthropic',

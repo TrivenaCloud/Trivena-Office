@@ -694,7 +694,7 @@ describe('streamForProvider: genspark', () => {
       cb,
     ).catch(() => {})
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://www.genspark.ai/api/anthropic/v1/messages',
+      'https://cloud.trivena.tech/api/llm/anthropic/v1/messages',
       expect.objectContaining({ headers: expect.objectContaining({ 'x-api-key': 'gsk-k' }) }),
     )
   })
@@ -713,7 +713,7 @@ describe('streamForProvider: genspark', () => {
       cb,
     ).catch(() => {})
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://www.genspark.ai/api/llm_proxy/gemini/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse',
+      'https://cloud.trivena.tech/api/llm/gemini/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse',
       expect.objectContaining({ headers: expect.objectContaining({ 'x-goog-api-key': 'gsk-k' }) }),
     )
   })
@@ -732,7 +732,7 @@ describe('streamForProvider: genspark', () => {
       cb,
     ).catch(() => {})
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://www.genspark.ai/api/llm_proxy/v1/chat/completions',
+      'https://cloud.trivena.tech/api/llm/openai/v1/chat/completions',
       expect.anything(),
     )
   })
@@ -748,7 +748,7 @@ describe('streamForProvider: genspark', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          headers: expect.objectContaining({ 'X-Agent-Type': 'genoffice' }),
+          headers: expect.objectContaining({ 'X-Agent-Type': 'trivoffice' }),
         }),
       )
     }

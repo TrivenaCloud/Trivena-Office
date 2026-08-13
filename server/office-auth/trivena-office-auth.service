@@ -1,0 +1,19 @@
+[Unit]
+Description=Trivena Office Auth (TrivOffice device-code login)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/trivena/office-auth
+Environment=OFFICE_AUTH_DATA=/var/lib/trivena-office-auth
+Environment=FRAPPE_BASE_URL=https://cloud.trivena.tech
+Environment=PUBLIC_BASE_URL=https://cloud.trivena.tech
+Environment=PATH=/opt/trivena/office-auth/.venv/bin:/usr/bin
+ExecStart=/opt/trivena/office-auth/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8010 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
