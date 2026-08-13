@@ -512,7 +512,8 @@ const tMain = createI18n({
     errParseFailed: 'Gagal mengurai file',
     errImageNoText: 'Lampiran gambar tidak memiliki teks; gambar dikirim bersama pesan pengguna',
     errNotImage: 'bukan jenis gambar yang didukung',
-    errGskNotLoggedIn: 'Belum masuk ke Trivena Cloud: klik “Masuk ke Trivena Cloud” di bawah, lalu coba lagi',
+    errGskNotLoggedIn:
+      'Belum masuk ke Trivena Cloud: klik “Masuk ke Trivena Cloud” di bawah, lalu coba lagi',
     errNoApiKey: 'API Key untuk {provider} belum dikonfigurasi',
     errNoModel: 'Nama model belum dikonfigurasi',
     errImgAbsPath: 'Jalur gambar harus berupa jalur absolut.',
@@ -885,7 +886,8 @@ const tMain = createI18n({
     errParseFailed: 'ניתוח הקובץ נכשל',
     errImageNoText: 'קבצים מצורפים מסוג תמונה אינם מכילים טקסט; התמונה נשלחת יחד עם הודעת המשתמש',
     errNotImage: 'סוג תמונה שאינו נתמך',
-    errGskNotLoggedIn: 'לא מחובר ל-Trivena Cloud: לחץ על "התחבר ל-Trivena Cloud" למטה, התחבר ונסה שוב',
+    errGskNotLoggedIn:
+      'לא מחובר ל-Trivena Cloud: לחץ על "התחבר ל-Trivena Cloud" למטה, התחבר ונסה שוב',
     errNoApiKey: 'לא הוגדר מפתח API עבור {provider}',
     errNoModel: 'לא הוגדר שם מודל',
     errImgAbsPath: 'נתיב התמונה חייב להיות מוחלט.',

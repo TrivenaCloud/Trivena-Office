@@ -874,7 +874,8 @@ const tMain = createI18n({
     errImageNoText:
       'Lampiran gambar tidak menyediakan teks; gambar dikirim bersama pesan pengguna dan dapat dilihat langsung',
     errNotImage: 'bukan jenis gambar yang didukung',
-    errGskNotLoggedIn: 'Belum masuk ke Trivena Cloud: klik “Masuk ke Trivena Cloud” di bawah, lalu coba lagi',
+    errGskNotLoggedIn:
+      'Belum masuk ke Trivena Cloud: klik “Masuk ke Trivena Cloud” di bawah, lalu coba lagi',
     errNoApiKey: 'API Key untuk {provider} belum dikonfigurasi',
     errNoModel: 'Nama model belum dikonfigurasi',
     menuFile: 'File',
@@ -1632,7 +1633,8 @@ const tMain = createI18n({
     errImageNoText:
       'קבצים מצורפים מסוג תמונה אינם מספקים טקסט; התמונה נשלחת יחד עם הודעת המשתמש וניתן לצפות בה ישירות',
     errNotImage: 'סוג תמונה שאינו נתמך',
-    errGskNotLoggedIn: 'לא מחובר ל-Trivena Cloud: לחץ על "התחבר ל-Trivena Cloud" למטה, התחבר ונסה שוב',
+    errGskNotLoggedIn:
+      'לא מחובר ל-Trivena Cloud: לחץ על "התחבר ל-Trivena Cloud" למטה, התחבר ונסה שוב',
     errNoApiKey: 'לא הוגדר מפתח API עבור {provider}',
     errNoModel: 'לא הוגדר שם מודל',
     menuFile: 'קובץ',

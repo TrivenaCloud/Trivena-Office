@@ -852,7 +852,8 @@ export const tMain = createI18n({
       'ยังไม่ได้ลงชื่อเข้าใช้ Trivena Cloud: แตะ “ลงชื่อเข้าใช้ Trivena Cloud” ด้านล่าง แล้วลองอีกครั้ง',
     errNoApiKey: 'ยังไม่ได้ตั้งค่า API Key ของ {provider}',
     errNoModel: 'ยังไม่ได้ตั้งค่าชื่อโมเดล',
-    errGskCli: 'gsk ยังไม่ได้เข้าสู่ระบบ: โปรดรัน gsk login เพื่อเข้าสู่ระบบบัญชี Trivena Cloud ก่อน',
+    errGskCli:
+      'gsk ยังไม่ได้เข้าสู่ระบบ: โปรดรัน gsk login เพื่อเข้าสู่ระบบบัญชี Trivena Cloud ก่อน',
     errNoDeckAppend:
       'ไม่มีเอกสารให้เพิ่มต่อท้าย (ไม่มีเซสชัน) โปรดสร้างหน้าแรกด้วย mode:"replace" ก่อน หรือใช้เครื่องมือเนทีฟเพิ่มหน้าแทน',
     errAppendFailed: 'เพิ่มต่อท้ายไม่สำเร็จ: {reason}',
@@ -957,7 +958,8 @@ export const tMain = createI18n({
     errImageNoText:
       'Lampiran gambar tidak menyediakan teks; gambar telah dikirim bersama pesan pengguna, silakan lihat gambarnya langsung',
     errNotImage: 'bukan jenis gambar yang didukung',
-    errGskNotLoggedIn: 'Belum masuk ke Trivena Cloud: klik “Masuk ke Trivena Cloud” di bawah, lalu coba lagi',
+    errGskNotLoggedIn:
+      'Belum masuk ke Trivena Cloud: klik “Masuk ke Trivena Cloud” di bawah, lalu coba lagi',
     errNoApiKey: 'API Key untuk {provider} belum dikonfigurasi',
     errNoModel: 'Nama model belum dikonfigurasi',
     errGskCli: 'gsk belum masuk: jalankan gsk login dulu untuk masuk ke akun Trivena Cloud',
@@ -1295,7 +1297,8 @@ export const tMain = createI18n({
       'Não conectado ao Trivena Cloud: clique em “Entrar no Trivena Cloud” abaixo, entre e tente novamente',
     errNoApiKey: 'Nenhuma chave de API configurada para {provider}',
     errNoModel: 'Nenhum nome de modelo configurado',
-    errGskCli: 'gsk não conectado: execute gsk login primeiro para entrar na sua conta Trivena Cloud',
+    errGskCli:
+      'gsk não conectado: execute gsk login primeiro para entrar na sua conta Trivena Cloud',
     errNoDeckAppend:
       'Não há apresentação para anexar (sessão inexistente). Gere a primeira página com mode:"replace" ou adicione páginas com as ferramentas nativas.',
     errAppendFailed: 'Falha ao anexar: {reason}',
@@ -1855,7 +1858,8 @@ export const tMain = createI18n({
     errParseFailed: 'ניתוח הקובץ נכשל',
     errImageNoText: 'קבצים מצורפים מסוג תמונה אינם מכילים טקסט; התמונה נשלחת יחד עם הודעת המשתמש',
     errNotImage: 'סוג תמונה שאינו נתמך',
-    errGskNotLoggedIn: 'לא מחובר ל-Trivena Cloud: לחץ על "התחבר ל-Trivena Cloud" למטה, התחבר ונסה שוב',
+    errGskNotLoggedIn:
+      'לא מחובר ל-Trivena Cloud: לחץ על "התחבר ל-Trivena Cloud" למטה, התחבר ונסה שוב',
     errNoApiKey: 'לא הוגדר מפתח API עבור {provider}',
     errNoModel: 'לא הוגדר שם מודל',
     errGskCli: 'gsk אינו מחובר: הרץ תחילה gsk login כדי להיכנס לחשבון Trivena Cloud שלך',

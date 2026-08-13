@@ -622,7 +622,8 @@ export const appStrings = defineStrings({
     appSettingsChecking: '確認中…',
     appSettingsLoggedIn: 'サインイン済み',
     appSettingsLoggedInEmail: 'サインイン済み：{email}',
-    appSettingsLoggedOut: '未サインイン（AI 機能には Trivena Cloud アカウントへのサインインが必要）',
+    appSettingsLoggedOut:
+      '未サインイン（AI 機能には Trivena Cloud アカウントへのサインインが必要）',
     appSettingsLoginPending: 'ブラウザーでのサインインを待機中…',
     appSettingsLogin: 'Trivena Cloud にサインイン',
     appSettingsModel: 'モデル',
@@ -1060,7 +1061,8 @@ export const appStrings = defineStrings({
     appSettingsChecking: 'Vérification…',
     appSettingsLoggedIn: 'Connecté',
     appSettingsLoggedInEmail: 'Connecté : {email}',
-    appSettingsLoggedOut: 'Non connecté (les fonctionnalités IA nécessitent un compte Trivena Cloud)',
+    appSettingsLoggedOut:
+      'Non connecté (les fonctionnalités IA nécessitent un compte Trivena Cloud)',
     appSettingsLoginPending: 'En attente de la connexion dans le navigateur…',
     appSettingsLogin: 'Se connecter à Trivena Cloud',
     appSettingsModel: 'Modèle',
@@ -2162,7 +2164,8 @@ export const appStrings = defineStrings({
     appSettingsChecking: 'Проверка…',
     appSettingsLoggedIn: 'Выполнен вход',
     appSettingsLoggedInEmail: 'Выполнен вход: {email}',
-    appSettingsLoggedOut: 'Вход не выполнен (для функций ИИ требуется учетная запись Trivena Cloud)',
+    appSettingsLoggedOut:
+      'Вход не выполнен (для функций ИИ требуется учетная запись Trivena Cloud)',
     appSettingsLoginPending: 'Ожидание входа в браузере…',
     appSettingsLogin: 'Войти в Trivena Cloud',
     appSettingsModel: 'Модель',

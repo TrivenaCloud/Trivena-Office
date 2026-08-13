@@ -592,7 +592,8 @@ export const aiStrings = defineStrings({
     aiAccountChecking: 'Comprobando…',
     aiLoggedIn: 'Sesión iniciada',
     aiLoggedInAs: 'Sesión iniciada: {email}',
-    aiNotLoggedIn: 'Sin sesión iniciada (las funciones de IA requieren una cuenta de Trivena Cloud)',
+    aiNotLoggedIn:
+      'Sin sesión iniciada (las funciones de IA requieren una cuenta de Trivena Cloud)',
     aiWaitingBrowserLogin: 'Esperando el inicio de sesión en el navegador…',
     aiLoginTrivenaCloud: 'Iniciar sesión en Trivena Cloud',
     aiModel: 'Modelo',

@@ -1905,7 +1905,8 @@ export const appStrings = defineStrings({
     appChecking: 'Comprobando…',
     appLoggedIn: 'Sesión iniciada',
     appLoggedInEmail: 'Sesión iniciada: {email}',
-    appNotLoggedIn: 'Sesión no iniciada (las funciones de IA requieren una cuenta de Trivena Cloud)',
+    appNotLoggedIn:
+      'Sesión no iniciada (las funciones de IA requieren una cuenta de Trivena Cloud)',
     appWaitingBrowserLogin: 'Esperando el inicio de sesión en el navegador…',
     appLoginTrivenaCloud: 'Iniciar sesión en Trivena Cloud',
     appModel: 'Modelo',
@@ -3559,7 +3560,8 @@ export const appStrings = defineStrings({
     appChecking: 'Verifica in corso…',
     appLoggedIn: 'Accesso effettuato',
     appLoggedInEmail: 'Accesso effettuato: {email}',
-    appNotLoggedIn: 'Accesso non effettuato (le funzionalità IA richiedono un account Trivena Cloud)',
+    appNotLoggedIn:
+      'Accesso non effettuato (le funzionalità IA richiedono un account Trivena Cloud)',
     appWaitingBrowserLogin: "In attesa dell'accesso dal browser…",
     appLoginTrivenaCloud: 'Accedi a Trivena Cloud',
     appModel: 'Modello',

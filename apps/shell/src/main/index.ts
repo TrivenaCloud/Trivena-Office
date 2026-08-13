@@ -1242,7 +1242,8 @@ const tMain = createI18n({
     pdfDocxBtnConvert: 'המשך',
     btnCancel: 'ביטול',
     pdfDocxFailedMsg: 'הייצוא כ-Word נכשל',
-    pdfDocxNoCliMsg: 'לא ניתן להתחבר ל-Trivena Cloud: רכיב נדרש (gsk) חסר. נא להתקין מחדש את האפליקציה.',
+    pdfDocxNoCliMsg:
+      'לא ניתן להתחבר ל-Trivena Cloud: רכיב נדרש (gsk) חסר. נא להתקין מחדש את האפליקציה.',
     pdfDocxBusyMsg: 'ייצוא ל-Word כבר מתבצע. נא להמתין לסיומו.',
     dlgPickSaveDir: 'בחירת מיקום שמירה כברירת מחדל',
     errSaveDirUnusable:
