@@ -98,9 +98,9 @@ export interface HomeApi {
   getUpdateChannel(): Promise<UpdateChannel>
   /** switch + persist the update channel; triggers an immediate update check */
   setUpdateChannel(channel: UpdateChannel): Promise<void>
-  /** Genspark account status (gsk login state; to be upgraded to a signup/account system later) */
+  /** Trivena Cloud account status (gsk login state; to be upgraded to a signup/account system later) */
   accountStatus(): Promise<AccountStatus>
-  /** start Genspark login (opens the browser; accountStatus flips to logged-in on completion); returns whether the launch succeeded */
+  /** start Trivena Cloud login (opens the browser; accountStatus flips to logged-in on completion); returns whether the launch succeeded */
   accountLogin(): Promise<boolean>
   /** progress events for the login started via accountLogin; returns an unsubscribe */
   onAccountLogin(handler: (ev: AccountLoginEvent) => void): () => void
@@ -126,11 +126,11 @@ export interface HomeApi {
   onThemeChanged(handler: (theme: UiTheme) => void): () => void
   /** open the Trivena community page in the default browser */
   openCommunity(): Promise<void>
-  /** open the Genspark credit-usage page in the default browser */
+  /** open the Trivena Cloud credit-usage page in the default browser */
   openCreditUsage(): Promise<void>
   /** locally stored full cloud project list (instant; null when no store or logged out) */
   cloudProjectsCached(): Promise<CloudProjectsSnapshot | null>
-  /** sync the full list from Genspark and return it (1 request when nothing changed); null when the sync failed */
+  /** sync the full list from Trivena Cloud and return it (1 request when nothing changed); null when the sync failed */
   cloudProjectsSync(): Promise<CloudProjectsSnapshot | null>
   /** open a cloud project (relative '/agents?id=...' URL) in the default browser */
   openCloudProject(projectUrl: string): Promise<void>
@@ -138,7 +138,7 @@ export interface HomeApi {
 
 export type CloudProjectKind = 'docs' | 'sheets' | 'slides'
 
-/** a Genspark web project shown in the home cloud section */
+/** a Trivena Cloud web project shown in the home cloud section */
 export interface CloudProjectEntry {
   projectId: string
   title: string
@@ -164,7 +164,7 @@ export interface AccountStatus {
   /** gsk is installed and logged in */
   loggedIn: boolean
   email?: string
-  /** remaining Genspark credits (absent when the balance query failed) */
+  /** remaining Trivena Cloud credits (absent when the balance query failed) */
   creditBalance?: number
 }
 

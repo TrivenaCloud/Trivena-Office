@@ -417,7 +417,7 @@ function ProjectPanel({ projects, selectedId, onSelect, onRefresh }: ProjectPane
 }
 
 // ── Account entry (bottom-left) ──────────────────────────
-// Currently the Genspark (gsk) login entry; to be upgraded to a signup/account system later.
+// Currently the Trivena Cloud (gsk) login entry; to be upgraded to a signup/account system later.
 // Clicking it opens the settings modal directly (SettingsModal.tsx), which hosts
 // login/logout plus preferences (language, theme, save location, update channel).
 
@@ -670,7 +670,7 @@ function AccountEntry({
   )
 }
 
-// ── Cloud (Genspark web) projects view ──────────────────
+// ── Cloud (Trivena Cloud web) projects view ──────────────────
 
 /** kind filter segments; labels shared with the recents type filter */
 const CLOUD_FILTERS = [
@@ -1001,7 +1001,7 @@ export function Home() {
   const [navCounts, setNavCounts] = useState({ recent: 0, starred: 0 })
   const [loadingMore, setLoadingMore] = useState(false)
   const [view, setView] = useState<'recent' | 'starred'>('recent')
-  // Genspark web projects take over the content area (like a selected project)
+  // Trivena Cloud web projects take over the content area (like a selected project)
   const [cloudMode, setCloudMode] = useState(false)
   const [filter, setFilter] = useState('all')
   // modified-column sort (WPS-style header popover), shared by the global and project tables
@@ -1014,7 +1014,7 @@ export function Home() {
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
   // name in the greeting; omitted when logged out
   const [accountName, setAccountName] = useState('')
-  // Genspark Projects is web-account data, so its nav entry only shows when logged in
+  // Trivena Cloud Projects is web-account data, so its nav entry only shows when logged in
   const [loggedIn, setLoggedIn] = useState(false)
   // single source of account state: AccountEntry reports every change (initial
   // load, login, logout), keeping the greeting name and the nav entry in sync

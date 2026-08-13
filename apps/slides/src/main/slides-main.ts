@@ -4019,7 +4019,7 @@ async function applyMainProcessProxy(): Promise<void> {
   try {
     await app.whenReady()
     // PAC/rule proxies answer per-host: probe the host the login flow, the
-    // Genspark LLM proxy and the gsk CLI actually target
+    // Trivena Cloud LLM proxy and the gsk CLI actually target
     const resolved = await electronSession.defaultSession.resolveProxy('https://www.genspark.ai/')
     // resolveProxy returns strings like "PROXY 127.0.0.1:1087" or "DIRECT"
     const m = /PROXY\s+([^;]+)/i.exec(resolved || '')

@@ -1209,7 +1209,7 @@ button {
   gap: 8px;
 }
 
-/* Genspark DS modal footer buttons: secondary = bg-subtle, primary = black (#232425) */
+/* Trivena Cloud DS modal footer buttons: secondary = bg-subtle, primary = black (#232425) */
 .pdf-modal-btn {
   display: inline-flex;
   align-items: center;
@@ -2652,7 +2652,7 @@ button {
   white-space: nowrap;
 }
 
-/* Genspark brand logo (shared by the collapsed entry and the AI panel title) */
+/* Trivena Cloud brand logo (shared by the collapsed entry and the AI panel title) */
 .genspark-badge {
   display: block;
   width: 22px;

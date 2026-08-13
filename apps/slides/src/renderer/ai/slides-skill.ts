@@ -506,7 +506,7 @@ const TOOLS: AgentToolDef[] = [
   {
     name: 'generate_image',
     description:
-      'AI image generation/editing (Genspark). Text-to-image, or pass referenceImageUrls for image editing; returns an image URL. NEW imagery: insert with insert_web_image. Editing an EXISTING slide picture (background removal/upscaling/etc.): swap it in place with replace_image — do not insert a duplicate. Use for custom illustrations/icons/backgrounds, style-consistent imagery; for real photos/screenshots still use image_search.',
+      'AI image generation/editing (Trivena Cloud). Text-to-image, or pass referenceImageUrls for image editing; returns an image URL. NEW imagery: insert with insert_web_image. Editing an EXISTING slide picture (background removal/upscaling/etc.): swap it in place with replace_image — do not insert a duplicate. Use for custom illustrations/icons/backgrounds, style-consistent imagery; for real photos/screenshots still use image_search.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -536,7 +536,7 @@ const TOOLS: AgentToolDef[] = [
   {
     name: 'analyze_media',
     description:
-      'Analyze media content (Genspark): understand images/audio/video. Pass media URLs (or local file paths) and analysis requirements; returns analysis text. Video supports extracting key points, structure, and time ranges — good for turning user material into usable deck content.',
+      'Analyze media content (Trivena Cloud): understand images/audio/video. Pass media URLs (or local file paths) and analysis requirements; returns analysis text. Video supports extracting key points, structure, and time ranges — good for turning user material into usable deck content.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -2360,7 +2360,7 @@ async function executeTool(
       if (!access.generatePageCloud || !(await access.isCloudPageGenEnabled?.().catch(() => false)))
         return fail(
           t('aiFailGenDeck'),
-          'Cloud slide generation is unavailable — sign in to Genspark (gsk) first',
+          'Cloud slide generation is unavailable — sign in to Trivena Cloud (gsk) first',
         )
       if (!access.generateFromHtml)
         return fail(

@@ -299,12 +299,12 @@ export function AiPanel({
         onPointerDown={startResize}
         role="separator"
         aria-orientation="vertical"
-        aria-label="Genspark"
+        aria-label="Trivena Cloud"
       />
       <header className="ai-panel-header">
         <span className="ai-panel-title">
-          <GensparkMark size={22} />
-          Genspark
+          <TrivenaMark size={22} />
+          Trivena Cloud
         </span>
         <div className="ai-panel-header-actions">
           {chat.length > 0 && (
@@ -587,9 +587,9 @@ function IconCollapse(): ReactElement {
   )
 }
 
-/** Genspark brand mark (rounded-square sparkle badge), inline so it renders
+/** Trivena Cloud brand mark (rounded-square sparkle badge), inline so it renders
  * crisply at device resolution instead of going through <img> rasterization */
-export function GensparkMark({ size = 18 }: { size?: number }): React.JSX.Element {
+export function TrivenaMark({ size = 18 }: { size?: number }): React.JSX.Element {
   return (
     <svg
       width={size}

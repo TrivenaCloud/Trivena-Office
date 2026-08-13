@@ -4,7 +4,7 @@ import { SHAPE_GALLERY_GROUPS, ShapePreview } from '@trivoffice/ui'
 
 import {
   CaretIcon,
-  GensparkMark,
+  TrivenaMark,
   RIBBON_GLYPH_ICONS,
   RedoIcon,
   SaveIcon,
@@ -2145,10 +2145,10 @@ function Ribbon({
           onClick={onAiToggle}
         >
           <span className="tool-icon-row">
-            <GensparkMark size={26} />
+            <TrivenaMark size={26} />
           </span>
           <span>
-            <strong>Genspark AI</strong>
+            <strong>Trivena AI</strong>
           </span>
         </button>
         <button
