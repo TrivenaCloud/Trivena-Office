@@ -28,7 +28,7 @@ from typing import Any, Iterator
 from urllib.parse import quote
 
 import httpx
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -376,9 +376,6 @@ def lookup_api_key(token: str) -> str | None:
 # ── Minimal LLM gateway (Phase 2 starter) ─────────────────────────────
 # Validates TrivOffice API keys and proxies to vendor APIs when keys are
 # present in the service environment (ANTHROPIC_API_KEY / OPENAI_API_KEY).
-
-from fastapi import Header, HTTPException
-from fastapi.responses import StreamingResponse
 
 
 def _require_office_key(authorization: str | None) -> str:
